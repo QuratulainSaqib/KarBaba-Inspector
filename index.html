@@ -3,6 +3,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<script>/* Signal to dc-runtime that resources are already provided locally — prevents it from re-fetching its own page over the network and mis-parsing the result. */
+window.__resources = {};</script>
 <script>/* React 18.3.1 (production, vendored) */
 /**
  * @license React
