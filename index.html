@@ -57137,12 +57137,12 @@ function buildSeedAnswers(){
             <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--color-text-muted);margin:4px 0 2px;">Identity &amp; Documentation</div>
             <div style="grid-column:1/-1;border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Registration Status</div>
-              <sc-raw-select data-field="registrationStatus" value="{{ wizard.content.ov.registrationStatus }}" sc-camel-on-change="{{ onOverviewChange }}" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;margin-bottom:8px;">
+              <sc-raw-select data-field="registrationStatus" value="{{ wizard.content.ov.registrationStatus }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;margin-bottom:8px;">
                 <option value="Registered">Registered</option>
                 <option value="Unregistered">Unregistered</option>
               </sc-raw-select>
               <sc-if value="{{ wizard.content.showRegistrationDetails }}" hint-placeholder-val="{{ true }}">
-                <input type="text" data-field="registrationNo" value="{{ wizard.content.ov.registrationNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="e.g. BNS-981" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+                <input type="text" data-field="registrationNo" value="{{ wizard.content.ov.registrationNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="e.g. BNS-981" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
                   <label style="font-size:11.5px;font-weight:600;padding:7px 11px;border-radius:6px;border:1px solid var(--color-brand);background:var(--kb-primary-050);color:var(--color-brand-press);cursor:pointer;">{{ wizard.content.ovRegPhotoView.btnLabel }}
                     <input type="file" accept="image/*" capture="environment" multiple="" data-field="ov_registrationNo" sc-camel-on-change="{{ onPhotoChange }}" style="display:none">
@@ -57158,7 +57158,7 @@ function buildSeedAnswers(){
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Chassis Number</div>
-              <input type="text" data-field="chassisNo" value="{{ wizard.content.ov.chassisNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="ZRE2171R-6027620" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <input type="text" data-field="chassisNo" value="{{ wizard.content.ov.chassisNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="ZRE2171R-6027620" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
               <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
                 <label style="font-size:11.5px;font-weight:600;padding:7px 11px;border-radius:6px;border:1px solid var(--color-brand);background:var(--kb-primary-050);color:var(--color-brand-press);cursor:pointer;">{{ wizard.content.ovChassisPhotoView.btnLabel }}
                   <input type="file" accept="image/*" capture="environment" multiple="" data-field="ov_chassisNo" sc-camel-on-change="{{ onPhotoChange }}" style="display:none">
@@ -57173,32 +57173,32 @@ function buildSeedAnswers(){
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Engine Number</div>
-              <input type="text" data-field="engineNo" value="{{ wizard.content.ov.engineNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="1ZRQ050090" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <input type="text" data-field="engineNo" value="{{ wizard.content.ov.engineNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="1ZRQ050090" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
             </div>
             <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--color-text-muted);margin:8px 0 2px;">Vehicle Specs</div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Mileage (km)</div>
-              <input type="number" data-field="mileage" value="{{ wizard.content.ov.mileage }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="53442" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <input type="number" data-field="mileage" value="{{ wizard.content.ov.mileage }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="53442" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Color</div>
-              <input type="text" data-field="color" value="{{ wizard.content.ov.color }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="White" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <input type="text" data-field="color" value="{{ wizard.content.ov.color }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="White" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Fuel Type</div>
-              <sc-raw-select data-field="fuelType" value="{{ wizard.content.ov.fuelType }}" sc-camel-on-change="{{ onOverviewChange }}" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <sc-raw-select data-field="fuelType" value="{{ wizard.content.ov.fuelType }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
                 <option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>CNG</option><option>Electric</option>
               </sc-raw-select>
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Transmission</div>
-              <sc-raw-select data-field="transmissionType" value="{{ wizard.content.ov.transmissionType }}" sc-camel-on-change="{{ onOverviewChange }}" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <sc-raw-select data-field="transmissionType" value="{{ wizard.content.ov.transmissionType }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
                 <option>Automatic</option><option>Manual</option><option>CVT</option>
               </sc-raw-select>
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;">Engine Capacity</div>
-              <input type="text" data-field="engineCapacity" value="{{ wizard.content.ov.engineCapacity }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="1600 cc" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
+              <input type="text" data-field="engineCapacity" value="{{ wizard.content.ov.engineCapacity }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="1600 cc" required="" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;">
             </div>
           </div>
         </sc-if>
@@ -57585,8 +57585,32 @@ class Component extends DCLogic {
 
   onStopPropagation = e => { e.stopPropagation(); };
 
+  validateOverviewStep(){
+    const ov = this.state.overview || {};
+    const missing = [];
+    if(!ov.registrationStatus || !String(ov.registrationStatus).trim()) missing.push('Registration Status');
+    if(!ov.chassisNo || !String(ov.chassisNo).trim()) missing.push('Chassis Number');
+    if(!ov.engineNo || !String(ov.engineNo).trim()) missing.push('Engine Number');
+    if(ov.mileage === '' || ov.mileage == null || !String(ov.mileage).trim()) missing.push('Mileage');
+    if(!ov.color || !String(ov.color).trim()) missing.push('Color');
+    if(!ov.fuelType || !String(ov.fuelType).trim()) missing.push('Fuel Type');
+    if(!ov.transmissionType || !String(ov.transmissionType).trim()) missing.push('Transmission');
+    if(!ov.engineCapacity || !String(ov.engineCapacity).trim()) missing.push('Engine Capacity');
+    if(ov.registrationStatus === 'Registered' && (!ov.registrationNo || !String(ov.registrationNo).trim())) missing.push('Registration Number');
+    return {valid: missing.length === 0, missing};
+  }
+
   onGoToStep = e => {
     const idx = +e.currentTarget.dataset.idx;
+    const currentStep = this.state.currentStep;
+    const currentStepDef = this.schema && this.schema.FORM_SCHEMA[currentStep];
+    if(this.schema && currentStepDef && currentStepDef.type === 'overview' && idx > currentStep){
+      const {valid, missing} = this.validateOverviewStep();
+      if(!valid){
+        alert(`Please fill all required fields in Vehicle Overview before continuing.\nMissing: ${missing.join(', ')}`);
+        return;
+      }
+    }
     this.setState(s => {
       const visited = {...s.visitedSteps};
       if(s.currentStep !== idx) visited[s.currentStep] = true;
