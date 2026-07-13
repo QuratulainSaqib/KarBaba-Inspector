@@ -57128,7 +57128,7 @@ function buildSeedAnswers(){
         </div>
 
         <sc-if value="{{ wizard.content.isOverview }}" hint-placeholder-val="{{ false }}">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 20px;background:var(--kb-grey-050);border-radius:var(--radius-mlg);padding:16px;margin-bottom:18px;font-size:12.5px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 20px;background:#fff;border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:16px;margin-bottom:18px;font-size:12.5px;">
             <sc-for list="{{ wizard.content.overviewReadonly }}" as="ro" hint-placeholder-count="8">
               <div><b>{{ ro.label }}:</b> {{ ro.value }}</div>
             </sc-for>
