@@ -54748,14 +54748,14 @@ const FORM_SCHEMA = [
     {key:'rearFender', label:'Rear Fender', vocab:V_BUMPER},
     {key:'frontRightDoor', label:'Front Right Door', vocab:V_BUMPER},
     {key:'frontLeftDoor', label:'Front Left Door', vocab:V_BUMPER},
-    {key:'backRightDoor', label:'Back Right Door', vocab:V_BUMPER},
-    {key:'backLeftDoor', label:'Back Left Door', vocab:V_BUMPER},
+    {key:'backRightDoor', label:'Back Right Door', vocab:V_BUMPER, optional:true},
+    {key:'backLeftDoor', label:'Back Left Door', vocab:V_BUMPER, optional:true},
     {key:'mirrors', label:'Side Mirror', vocab:V_MIRROR, img:true},
     {key:'windshield', label:'Windshield', vocab:V_GLASS, img:true},
     {key:'rearGlass', label:'Rear Glass', vocab:V_GLASS, img:true},
     {key:'headlights', label:'Headlights', vocab:V_LIGHT, img:true},
     {key:'tailLights', label:'Tail Lights', vocab:V_LIGHT, img:true},
-    {key:'fogLamps', label:'Fog Lamps', vocab:V_LIGHT},
+    {key:'fogLamps', label:'Fog Lamps', vocab:V_LIGHT, optional:true},
     {key:'indicators', label:'Indicators', vocab:V_LIGHT},
     {key:'wipers', label:'Wipers', vocab:V_WIPER},
     {key:'numberPlates', label:'Number Plates', vocab:V_EXT},
@@ -54801,7 +54801,7 @@ const FORM_SCHEMA = [
     {key:'gearShift', label:'Gear Shift', vocab:V_FUNC},
     {key:'transOil', label:'Transmission Oil', vocab:V_FLUID, img:true},
     {key:'transLeak', label:'Transmission Leakage', vocab:V_LEAK, img:true},
-    {key:'clutch', label:'Clutch', vocab:V_CLUTCH},
+    {key:'clutch', label:'Clutch', vocab:V_CLUTCH, optional:true},
     {key:'driveShaft', label:'Drive Shaft', vocab:V_COND},
     {key:'cvJointLeft', label:'CV Joint Left', vocab:V_BODY, img:true},
     {key:'cvJointRight', label:'CV Joint Right', vocab:V_BODY, img:true},
@@ -54852,31 +54852,31 @@ const FORM_SCHEMA = [
     {key:'reverseLights', label:'Reverse Lights', vocab:V_FUNC, img:true},
     {key:'cabinLights', label:'Cabin Lights', vocab:V_FUNC, img:true},
     {key:'dashboardLights', label:'Dashboard Lights', vocab:V_BODY, img:true},
-    {key:'powerWindows', label:'Power Windows', vocab:V_FUNC},
-    {key:'centralLocking', label:'Central Locking', vocab:V_FUNC},
+    {key:'powerWindows', label:'Power Windows', vocab:V_FUNC, optional:true},
+    {key:'centralLocking', label:'Central Locking', vocab:V_FUNC, optional:true},
   ]},
   {key:'interior', title:'Interior', desc:'Cabin condition and features.', type:'grid', items:[
     {key:'dashboard', label:'Dashboard', vocab:V_FLUID, img:true},
     {key:'steeringWheel', label:'Steering Wheel', vocab:V_COND, img:true},
     {key:'seats', label:'Seats', vocab:V_COND},
-    {key:'seatElectricRight', label:'Right Front Seat Electric Function', vocab:V_FUNC},
-    {key:'seatElectricLeft', label:'Left Front Seat Electric Function', vocab:V_FUNC},
+    {key:'seatElectricRight', label:'Right Front Seat Electric Function', vocab:V_FUNC, optional:true},
+    {key:'seatElectricLeft', label:'Left Front Seat Electric Function', vocab:V_FUNC, optional:true},
     {key:'seatBeltRight', label:'Right Seat Belt', vocab:V_FUNC},
     {key:'seatBeltLeft', label:'Left Seat Belt', vocab:V_FUNC},
     {key:'rearSeatBelts', label:'Rear Seat Belts', vocab:V_FUNC},
     {key:'roofLining', label:'Roof Lining', vocab:V_FLUID},
     {key:'upholstery', label:'Seat Cover', vocab:V_COND},
-    {key:'infotainment', label:'Infotainment', vocab:V_FUNC},
+    {key:'infotainment', label:'Infotainment', vocab:V_FUNC, optional:true},
     {key:'speakers', label:'Speakers', vocab:V_FUNC},
-    {key:'reverseCamera', label:'Reverse Camera', vocab:V_FUNC, img:true},
-    {key:'parkingSensors', label:'Parking Sensors', vocab:V_FUNC, img:true},
+    {key:'reverseCamera', label:'Reverse Camera', vocab:V_FUNC, img:true, optional:true},
+    {key:'parkingSensors', label:'Parking Sensors', vocab:V_FUNC, img:true, optional:true},
   ]},
   {key:'ac', title:'AC & Climate', desc:'Climate control performance.', type:'grid', items:[
     {key:'acFitted', label:'AC Fitted', vocab:V_FITTED},
-    {key:'acCooling', label:'AC Cooling', vocab:V_COND, img:true},
+    {key:'acCooling', label:'AC Cooling', vocab:V_COND, img:true, requiredIfKey:'acFitted', requiredIfValue:'Yes'},
     {key:'heater', label:'Heater', vocab:V_FUNC},
     {key:'blower', label:'Blower', vocab:V_FUNC},
-    {key:'rearAc', label:'Rear AC', vocab:V_CLUTCH},
+    {key:'rearAc', label:'Rear AC', vocab:V_CLUTCH, optional:true},
   ]},
   {key:'roadtest', title:'Road Test', desc:'On-road driving evaluation.', type:'grid', items:[
     {key:'acceleration', label:'Acceleration', vocab:V_ACCEL},
@@ -54924,7 +54924,7 @@ function classifyCondition(val){
   return {label:'Critical', bucket:'bad'};
 }
 function statusToCalc(valueText, bucket){
-  if(NOT_CHECKED_VALUES.has(valueText)) return 'NOT_CHECKED';
+  if(!valueText || NOT_CHECKED_VALUES.has(valueText)) return 'NOT_CHECKED';
   return bucket === 'ok' ? 'OK' : 'FAULTY';
 }
 function calcPercentageFromCounts(okCount, faultyCount){
@@ -57135,14 +57135,17 @@ function buildSeedAnswers(){
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 20px;">
             <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--color-text-muted);margin:4px 0 2px;">Identity &amp; Documentation</div>
-            <div style="grid-column:1/-1;border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
+            <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.registrationStatus }};">Registration Status <span style="color:var(--color-danger);">*</span></div>
               <sc-raw-select data-field="registrationStatus" value="{{ wizard.content.ov.registrationStatus }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.registrationStatus }};border-radius:6px;font-size:13px;margin-bottom:8px;">
+                <option value="">Select Status</option>
                 <option value="Registered">Registered</option>
                 <option value="Unregistered">Unregistered</option>
               </sc-raw-select>
               <sc-if value="{{ wizard.content.showRegistrationDetails }}" hint-placeholder-val="{{ true }}">
-                <input type="text" data-field="registrationNo" value="{{ wizard.content.ov.registrationNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="e.g. BNS-981" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.registrationNo }};border-radius:6px;font-size:13px;">
+                <input type="text" data-field="registrationNo" value="{{ wizard.content.ov.registrationNo }}" sc-camel-on-change="{{ onOverviewChange }}" sc-camel-on-blur="{{ onOverviewBlur }}" placeholder="e.g. LEA-1234" maxlength="9" pattern="[A-Z]{2,4}-[0-9]{1,4}" title="Format: ABC-1234 (2-4 letters, dash, 1-4 digits)" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.registrationNo }};border-radius:6px;font-size:13px;text-transform:uppercase;">
+                <div style="font-size:11px;color:var(--color-text-muted);margin-top:4px;">Format: ABC-1234</div>
                 <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
                   <label style="font-size:11.5px;font-weight:600;padding:7px 11px;border-radius:6px;border:1px solid var(--color-brand);background:var(--kb-primary-050);color:var(--color-brand-press);cursor:pointer;">{{ wizard.content.ovRegPhotoView.btnLabel }}
                     <input type="file" accept="image/*" capture="environment" multiple="" data-field="ov_registrationNo" sc-camel-on-change="{{ onPhotoChange }}" style="display:none">
@@ -57158,7 +57161,8 @@ function buildSeedAnswers(){
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.chassisNo }};">Chassis Number <span style="color:var(--color-danger);">*</span></div>
-              <input type="text" data-field="chassisNo" value="{{ wizard.content.ov.chassisNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="ZRE2171R-6027620" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.chassisNo }};border-radius:6px;font-size:13px;">
+              <input type="text" data-field="chassisNo" value="{{ wizard.content.ov.chassisNo }}" sc-camel-on-change="{{ onOverviewChange }}" sc-camel-on-blur="{{ onOverviewBlur }}" placeholder="e.g. ZRE2171R-6027620" maxlength="16" pattern="[A-Z0-9]{5,10}-[0-9]{5,8}" title="Format: CODE-1234567 (code, dash, digits)" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.chassisNo }};border-radius:6px;font-size:13px;text-transform:uppercase;">
+              <div style="font-size:11px;color:var(--color-text-muted);margin-top:4px;">Format: ZRE2171R-6027620</div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
                 <label style="font-size:11.5px;font-weight:600;padding:7px 11px;border-radius:6px;border:1px solid var(--color-brand);background:var(--kb-primary-050);color:var(--color-brand-press);cursor:pointer;">{{ wizard.content.ovChassisPhotoView.btnLabel }}
                   <input type="file" accept="image/*" capture="environment" multiple="" data-field="ov_chassisNo" sc-camel-on-change="{{ onPhotoChange }}" style="display:none">
@@ -57171,29 +57175,44 @@ function buildSeedAnswers(){
                 </sc-for>
               </div>
             </div>
-            <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
-              <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.engineNo }};">Engine Number <span style="color:var(--color-danger);">*</span></div>
-              <input type="text" data-field="engineNo" value="{{ wizard.content.ov.engineNo }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="1ZRQ050090" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.engineNo }};border-radius:6px;font-size:13px;">
             </div>
             <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--color-text-muted);margin:8px 0 2px;">Vehicle Specs</div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.mileage }};">Mileage (km) <span style="color:var(--color-danger);">*</span></div>
-              <input type="number" data-field="mileage" value="{{ wizard.content.ov.mileage }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="53442" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.mileage }};border-radius:6px;font-size:13px;">
+              <div style="position:relative;">
+                <input type="number" data-field="mileage" value="{{ wizard.content.ov.mileage }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="53442" required="" style="width:100%;padding:9px 40px 9px 10px;border:1px solid {{ wizard.content.ovBorder.mileage }};border-radius:6px;font-size:13px;">
+                <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12.5px;font-weight:600;color:var(--color-text-muted);pointer-events:none;">km</span>
+              </div>
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.color }};">Color <span style="color:var(--color-danger);">*</span></div>
-              <input type="text" data-field="color" value="{{ wizard.content.ov.color }}" sc-camel-on-change="{{ onOverviewChange }}" placeholder="White" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.color }};border-radius:6px;font-size:13px;">
+              <sc-raw-select data-field="color" value="{{ wizard.content.ov.color }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.color }};border-radius:6px;font-size:13px;">
+                <option value="">Select Color</option>
+                <option>White</option><option>Black</option><option>Silver</option><option>Grey</option>
+                <option>Red</option><option>Maroon</option><option>Blue</option><option>Navy Blue</option>
+                <option>Green</option><option>Beige</option><option>Gold</option><option>Brown</option>
+                <option>Orange</option><option>Yellow</option><option>Purple</option><option>Bronze</option>
+                <option>Pearl White</option><option>Other</option>
+              </sc-raw-select>
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.fuelType }};">Fuel Type <span style="color:var(--color-danger);">*</span></div>
               <sc-raw-select data-field="fuelType" value="{{ wizard.content.ov.fuelType }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.fuelType }};border-radius:6px;font-size:13px;">
+                <option value="">Select Fuel Type</option>
                 <option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>CNG</option><option>Electric</option>
               </sc-raw-select>
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
               <div style="font-size:12.5px;font-weight:600;margin-bottom:6px;color:{{ wizard.content.ovLabelColor.transmissionType }};">Transmission <span style="color:var(--color-danger);">*</span></div>
               <sc-raw-select data-field="transmissionType" value="{{ wizard.content.ov.transmissionType }}" sc-camel-on-change="{{ onOverviewChange }}" required="" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.ovBorder.transmissionType }};border-radius:6px;font-size:13px;">
-                <option>Automatic</option><option>Manual</option><option>CVT</option>
+                <option value="">Select Transmission</option>
+                <option value="FAT">FAT (Fully Automatic)</option>
+                <option value="AT">AT (Automatic)</option>
+                <option value="CVT">CVT</option>
+                <option value="DCT">DCT (Dual Clutch)</option>
+                <option value="MT">MT (Manual)</option>
+                <option value="Semi Automatic">Semi Automatic</option>
+                <option value="Sport AT">Sport AT</option>
               </sc-raw-select>
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
@@ -57204,6 +57223,12 @@ function buildSeedAnswers(){
         </sc-if>
 
         <sc-if value="{{ wizard.content.isImages }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ wizard.content.hasCover }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:10px;">Add photos of the vehicle. The first photo becomes the cover photo.</div>
+          </sc-if>
+          <sc-if value="{{ wizard.content.showImagesRequiredHint }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:12px;color:var(--color-danger);font-weight:600;margin-bottom:10px;">* At least one photo (cover photo) is required before you can continue.</div>
+          </sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
             <sc-if value="{{ wizard.content.hasCover }}" hint-placeholder-val="{{ false }}">
               <div sc-camel-on-click="{{ onOpenImgModal }}" data-entryid="{{ wizard.content.cover.id }}" style="grid-column:1/-1;position:relative;aspect-ratio:16/9;border-radius:var(--radius-mlg);overflow:hidden;cursor:pointer;background:#000;">
@@ -57235,8 +57260,9 @@ function buildSeedAnswers(){
               </sc-if>
               <sc-if value="{{ it.isField }}" hint-placeholder-val="{{ true }}">
                 <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;background:var(--color-bg-surface);">
-                  <div style="font-size:12.5px;font-weight:600;margin-bottom:7px;">{{ it.label }}</div>
-                  <sc-raw-select data-field="{{ it.fieldId }}" value="{{ it.value }}" sc-camel-on-change="{{ onSelectChange }}" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;margin-bottom:7px;background:#fff;">
+                  <div style="font-size:12.5px;font-weight:600;margin-bottom:7px;color:{{ it.labelColor }};">{{ it.label }} <sc-if value="{{ it.isRequired }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-danger);">*</span></sc-if></div>
+                  <sc-raw-select data-field="{{ it.fieldId }}" value="{{ it.value }}" sc-camel-on-change="{{ onSelectChange }}" style="width:100%;padding:9px 10px;border:1px solid {{ it.borderColor }};border-radius:6px;font-size:13px;margin-bottom:7px;background:#fff;">
+                    <option value="">Select</option>
                     <sc-for list="{{ it.options }}" as="opt" hint-placeholder-count="4">
                       <option value="{{ opt.label }}">{{ opt.label }}</option>
                     </sc-for>
@@ -57265,12 +57291,12 @@ function buildSeedAnswers(){
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
             <sc-for list="{{ wizard.content.cards }}" as="card" hint-placeholder-count="5">
               <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;background:var(--color-bg-surface);">
-                <div style="font-size:12.5px;font-weight:700;margin-bottom:8px;">{{ card.label }}</div>
+                <div style="font-size:12.5px;font-weight:700;margin-bottom:8px;">{{ card.label }} <span style="color:var(--color-danger);">*</span></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-                  <input type="text" data-tirekey="{{ card.key }}" data-tirefield="brand" value="{{ card.brand }}" sc-camel-on-change="{{ onTireChange }}" placeholder="Brand e.g. Dunlop" style="padding:8px 9px;border:1px solid var(--color-border-default);border-radius:6px;font-size:12.5px;">
-                  <input type="text" data-tirekey="{{ card.key }}" data-tirefield="size" value="{{ card.size }}" sc-camel-on-change="{{ onTireChange }}" placeholder="Size e.g. 205/65 R16" style="padding:8px 9px;border:1px solid var(--color-border-default);border-radius:6px;font-size:12.5px;">
+                  <input type="text" data-tirekey="{{ card.key }}" data-tirefield="brand" value="{{ card.brand }}" sc-camel-on-change="{{ onTireChange }}" placeholder="Brand e.g. Dunlop" style="padding:8px 9px;border:1px solid {{ card.brandBorder }};border-radius:6px;font-size:12.5px;">
+                  <input type="text" data-tirekey="{{ card.key }}" data-tirefield="size" value="{{ card.size }}" sc-camel-on-change="{{ onTireChange }}" placeholder="Size e.g. 205/65 R16" style="padding:8px 9px;border:1px solid {{ card.sizeBorder }};border-radius:6px;font-size:12.5px;">
                 </div>
-                <input type="number" data-tirekey="{{ card.key }}" data-tirefield="life" value="{{ card.life }}" sc-camel-on-change="{{ onTireChange }}" placeholder="Remaining Life % e.g. 80" style="width:100%;padding:8px 9px;border:1px solid var(--color-border-default);border-radius:6px;font-size:12.5px;margin-bottom:8px;">
+                <input type="number" data-tirekey="{{ card.key }}" data-tirefield="life" value="{{ card.life }}" sc-camel-on-change="{{ onTireChange }}" placeholder="Remaining Life % e.g. 80" style="width:100%;padding:8px 9px;border:1px solid {{ card.lifeBorder }};border-radius:6px;font-size:12.5px;margin-bottom:8px;">
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                   <label style="font-size:11px;font-weight:600;padding:6px 10px;border-radius:6px;border:1px solid var(--color-brand);background:var(--kb-primary-050);color:var(--color-brand-press);cursor:pointer;white-space:nowrap;">{{ card.photoView.btnLabel }}
                     <input type="file" accept="image/*" capture="environment" multiple="" data-field="{{ card.fieldId }}" sc-camel-on-change="{{ onPhotoChange }}" style="display:none">
@@ -57285,8 +57311,9 @@ function buildSeedAnswers(){
               </div>
             </sc-for>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
-              <div style="font-size:12.5px;font-weight:600;margin-bottom:7px;">Rims</div>
-              <sc-raw-select value="{{ wizard.content.rimsValue }}" sc-camel-on-change="{{ onRimsChange }}" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;margin-bottom:7px;">
+              <div style="font-size:12.5px;font-weight:600;margin-bottom:7px;">Rims <span style="color:var(--color-danger);">*</span></div>
+              <sc-raw-select value="{{ wizard.content.rimsValue }}" sc-camel-on-change="{{ onRimsChange }}" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.rimsBorder }};border-radius:6px;font-size:13px;margin-bottom:7px;">
+                <option value="">Select</option>
                 <sc-for list="{{ wizard.content.rimsOptions }}" as="ro2" hint-placeholder-count="5">
                   <option value="{{ ro2.label }}">{{ ro2.label }}</option>
                 </sc-for>
@@ -57294,8 +57321,9 @@ function buildSeedAnswers(){
               <input type="text" value="{{ wizard.content.rimsRemark }}" sc-camel-on-change="{{ onRimsRemarkChange }}" placeholder="Remarks (optional)" style="width:100%;padding:7px 9px;border:1px solid var(--color-border-subtle);border-radius:6px;font-size:11.5px;">
             </div>
             <div style="border:1px solid var(--color-border-default);border-radius:var(--radius-mlg);padding:12px;">
-              <div style="font-size:12.5px;font-weight:600;margin-bottom:7px;">Wheel Caps</div>
-              <sc-raw-select value="{{ wizard.content.wheelCapsValue }}" sc-camel-on-change="{{ onWheelCapsChange }}" style="width:100%;padding:9px 10px;border:1px solid var(--color-border-default);border-radius:6px;font-size:13px;margin-bottom:7px;">
+              <div style="font-size:12.5px;font-weight:600;margin-bottom:7px;">Wheel Caps <span style="color:var(--color-danger);">*</span></div>
+              <sc-raw-select value="{{ wizard.content.wheelCapsValue }}" sc-camel-on-change="{{ onWheelCapsChange }}" style="width:100%;padding:9px 10px;border:1px solid {{ wizard.content.wheelCapsBorder }};border-radius:6px;font-size:13px;margin-bottom:7px;">
+                <option value="">Select</option>
                 <sc-for list="{{ wizard.content.wheelCapOptions }}" as="wo" hint-placeholder-count="3">
                   <option value="{{ wo.label }}">{{ wo.label }}</option>
                 </sc-for>
@@ -57478,7 +57506,39 @@ function freshTires(){
   return t;
 }
 function freshOverview(){
-  return { registrationStatus:'Registered', registrationNo:'', chassisNo:'', engineNo:'', mileage:'', color:'', fuelType:'Petrol', transmissionType:'Automatic', engineCapacity:'' };
+  return { registrationStatus:'', registrationNo:'', chassisNo:'', mileage:'', color:'', fuelType:'', transmissionType:'', engineCapacity:'' };
+}
+// Auto-mask registration number as user types, e.g. "LEA1234" -> "LEA-1234" (like CNIC auto-dash)
+function maskRegistrationNo(raw){
+  const clean = String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const letters = (clean.match(/^[A-Z]*/)[0] || '').slice(0,4);
+  const digits = clean.slice(letters.length).replace(/[^0-9]/g,'').slice(0,4);
+  return digits ? `${letters}-${digits}` : letters;
+}
+// Auto-mask chassis number as user types, e.g. "ZRE2171R6027620" -> "ZRE2171R-6027620"
+function maskChassisNo(raw){
+  const clean = String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const code = clean.slice(0,8);
+  const digits = clean.slice(8,15).replace(/[^0-9]/g,'');
+  return digits ? `${code}-${digits}` : code;
+}
+// Masks a value while keeping the caret in the right spot, so typing feels natural (like a CNIC field)
+function maskWithCursor(raw, cursorPos, type){
+  const rawStr = String(raw||'');
+  const upToCursorClean = rawStr.slice(0, cursorPos).toUpperCase().replace(/[^A-Z0-9]/g,'').length;
+  const fullClean = rawStr.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  let masked, boundary;
+  if(type === 'reg'){
+    masked = maskRegistrationNo(rawStr);
+    boundary = (fullClean.match(/^[A-Z]*/)[0] || '').slice(0,4).length;
+  } else {
+    masked = maskChassisNo(rawStr);
+    boundary = Math.min(fullClean.length, 8);
+  }
+  let cursor = upToCursorClean;
+  if(masked.indexOf('-') !== -1 && upToCursorClean > boundary) cursor += 1;
+  cursor = Math.min(cursor, masked.length);
+  return {value: masked, cursor};
 }
 
 class Component extends DCLogic {
@@ -57508,6 +57568,8 @@ class Component extends DCLogic {
 
     overview: freshOverview(),
     overviewErrors: {},
+    gridErrors: {},
+    tireErrors: {},
     tires: freshTires(),
     rims: '', rimsRemark: '',
     wheelCaps: '', wheelCapsRemark: '',
@@ -57573,9 +57635,7 @@ class Component extends DCLogic {
     const reqId = this.state.detailReqId;
     const req = this.state.assignedData.find(r => r.id === reqId);
     if(!req) return;
-    const seed = this.schema.buildSeedAnswers();
     const tires = freshTires();
-    TIRE_KEYS.forEach(k => { tires[k].life = seed.tireLife[k] || ''; });
     this.setState({
       detailReqId: null,
       wizardOpen: true,
@@ -57584,10 +57644,12 @@ class Component extends DCLogic {
       currentStep: 0,
       visitedSteps: {},
       wizardNavSheetOpen: false,
-      answers: seed.answers,
+      answers: {},
       remarks: {},
       photos: {},
       overview: freshOverview(),
+      gridErrors: {},
+      tireErrors: {},
       overviewErrors: {},
       rims: '', rimsRemark: '', wheelCaps: '', wheelCapsRemark: '',
       images: [], imagePhotos: {}, imgCounter: 0,
@@ -57602,14 +57664,20 @@ class Component extends DCLogic {
     const ov = this.state.overview || {};
     const labels = {
       registrationStatus:'Registration Status', registrationNo:'Registration Number',
-      chassisNo:'Chassis Number', engineNo:'Engine Number', mileage:'Mileage',
+      chassisNo:'Chassis Number', mileage:'Mileage',
       color:'Color', fuelType:'Fuel Type', transmissionType:'Transmission', engineCapacity:'Engine Capacity',
     };
+    const REG_NO_FORMAT = /^[A-Z]{2,4}-\d{1,4}$/;
+    const CHASSIS_FORMAT = /^[A-Z0-9]{5,10}-\d{5,8}$/;
     const missingKeys = [];
+    const formatErrors = [];
     if(!ov.registrationStatus || !String(ov.registrationStatus).trim()) missingKeys.push('registrationStatus');
-    if(ov.registrationStatus === 'Registered' && (!ov.registrationNo || !String(ov.registrationNo).trim())) missingKeys.push('registrationNo');
+    if(ov.registrationStatus === 'Registered'){
+      if(!ov.registrationNo || !String(ov.registrationNo).trim()) missingKeys.push('registrationNo');
+      else if(!REG_NO_FORMAT.test(String(ov.registrationNo).trim())){ missingKeys.push('registrationNo'); formatErrors.push('Registration Number must be in the format ABC-1234 (letters, dash, digits)'); }
+    }
     if(!ov.chassisNo || !String(ov.chassisNo).trim()) missingKeys.push('chassisNo');
-    if(!ov.engineNo || !String(ov.engineNo).trim()) missingKeys.push('engineNo');
+    else if(!CHASSIS_FORMAT.test(String(ov.chassisNo).trim())){ missingKeys.push('chassisNo'); formatErrors.push('Chassis Number must be in the format ZRE2171R-6027620 (code, dash, digits)'); }
     if(ov.mileage === '' || ov.mileage == null || !String(ov.mileage).trim()) missingKeys.push('mileage');
     if(!ov.color || !String(ov.color).trim()) missingKeys.push('color');
     if(!ov.fuelType || !String(ov.fuelType).trim()) missingKeys.push('fuelType');
@@ -57617,21 +57685,79 @@ class Component extends DCLogic {
     if(!ov.engineCapacity || !String(ov.engineCapacity).trim()) missingKeys.push('engineCapacity');
     const errObj = {};
     missingKeys.forEach(k => errObj[k] = true);
-    return {valid: missingKeys.length === 0, missing: missingKeys.map(k=>labels[k]), errObj};
+    const missing = missingKeys.map(k=>labels[k]).concat(formatErrors);
+    return {valid: missingKeys.length === 0, missing, errObj};
+  }
+
+  validateGridStep(step){
+    const errObj = {};
+    const missing = [];
+    step.items.filter(it=>it.type!=='group').forEach(it=>{
+      if(!this.isItemRequired(step, it)) return;
+      const fieldId = `${step.key}_${it.key}`;
+      const a = this.state.answers[fieldId];
+      if(!a || !a.value){ errObj[fieldId] = true; missing.push(it.label); }
+    });
+    return {valid: missing.length === 0, missing, errObj};
+  }
+
+  validateTiresStep(){
+    const errObj = {};
+    const missing = [];
+    TIRE_KEYS.forEach(k=>{
+      const t = this.state.tires[k];
+      const posLabel = (this.schema.TIRE_POSITIONS.find(([,key])=>key===k)||[k])[0];
+      if(!t.brand || !String(t.brand).trim()){ errObj[`tire_${k}_brand`] = true; missing.push(`${posLabel} Brand`); }
+      if(!t.size || !String(t.size).trim()){ errObj[`tire_${k}_size`] = true; missing.push(`${posLabel} Size`); }
+      if(t.life === '' || t.life == null || !String(t.life).trim()){ errObj[`tire_${k}_life`] = true; missing.push(`${posLabel} Remaining Life`); }
+    });
+    if(!this.state.rims){ errObj.rims = true; missing.push('Rims'); }
+    if(!this.state.wheelCaps){ errObj.wheelCaps = true; missing.push('Wheel Caps'); }
+    return {valid: missing.length === 0, missing, errObj};
+  }
+
+  validateImagesStep(){
+    const filled = this.state.images.filter(e=>this.state.imagePhotos[e.id]);
+    if(filled.length === 0) return {valid:false, missing:['At least one vehicle image (cover photo)']};
+    return {valid:true, missing:[]};
   }
 
   onGoToStep = e => {
     const idx = +e.currentTarget.dataset.idx;
     const currentStep = this.state.currentStep;
     const currentStepDef = this.schema && this.schema.FORM_SCHEMA[currentStep];
-    if(this.schema && currentStepDef && currentStepDef.type === 'overview' && idx > currentStep){
-      const {valid, missing, errObj} = this.validateOverviewStep();
-      if(!valid){
-        this.setState({overviewErrors: errObj});
-        alert(`Please fill all required fields in Vehicle Overview before continuing.\nMissing: ${missing.join(', ')}`);
-        return;
+    if(this.schema && currentStepDef && idx > currentStep){
+      if(currentStepDef.type === 'overview'){
+        const {valid, missing, errObj} = this.validateOverviewStep();
+        if(!valid){
+          this.setState({overviewErrors: errObj});
+          alert(`Please fill all required fields in Vehicle Overview before continuing.\nMissing: ${missing.join(', ')}`);
+          return;
+        }
+        this.setState({overviewErrors: {}});
+      } else if(currentStepDef.type === 'grid'){
+        const {valid, missing, errObj} = this.validateGridStep(currentStepDef);
+        if(!valid){
+          this.setState({gridErrors: errObj});
+          alert(`Please fill all required fields in ${currentStepDef.title} before continuing.\nMissing: ${missing.join(', ')}`);
+          return;
+        }
+        this.setState({gridErrors: {}});
+      } else if(currentStepDef.type === 'tires'){
+        const {valid, missing, errObj} = this.validateTiresStep();
+        if(!valid){
+          this.setState({tireErrors: errObj});
+          alert(`Please fill all required fields in Tires before continuing.\nMissing: ${missing.join(', ')}`);
+          return;
+        }
+        this.setState({tireErrors: {}});
+      } else if(currentStepDef.type === 'images'){
+        const {valid, missing} = this.validateImagesStep();
+        if(!valid){
+          alert(`Please add the required photo before continuing.\nMissing: ${missing.join(', ')}`);
+          return;
+        }
       }
-      this.setState({overviewErrors: {}});
     }
     this.setState(s => {
       const visited = {...s.visitedSteps};
@@ -57662,6 +57788,8 @@ class Component extends DCLogic {
       remarks: {},
       photos: {},
       overview: freshOverview(),
+      gridErrors: {},
+      tireErrors: {},
       overviewErrors: {},
       rims: '', rimsRemark: '', wheelCaps: '', wheelCapsRemark: '',
       images: [], imagePhotos: {}, imgCounter: 0,
@@ -57675,9 +57803,17 @@ class Component extends DCLogic {
   onSelectChange = e => {
     const fieldId = e.target.dataset.field;
     const value = e.target.value;
+    if(!value){
+      this.setState(s => { const answers = {...s.answers}; delete answers[fieldId]; return {answers}; });
+      return;
+    }
     const item = this.schema.ITEM_MAP[fieldId];
     const opt = item ? item.vocab.find(o => o.label === value) : null;
-    this.setState(s => ({answers: {...s.answers, [fieldId]: {value, bucket: opt ? opt.bucket : 'bad'}}}));
+    this.setState(s => {
+      const gridErrors = {...s.gridErrors};
+      delete gridErrors[fieldId];
+      return {answers: {...s.answers, [fieldId]: {value, bucket: opt ? opt.bucket : 'bad'}}, gridErrors};
+    });
   };
   onRemarkChange = e => {
     const fieldId = e.target.dataset.field;
@@ -57721,7 +57857,22 @@ class Component extends DCLogic {
 
   onOverviewChange = e => {
     const field = e.target.dataset.field;
-    const value = e.target.value;
+    const el = e.target;
+    let value = el.value;
+    if(field === 'registrationNo' || field === 'chassisNo'){
+      const cursorPos = el.selectionStart == null ? value.length : el.selectionStart;
+      const type = field === 'registrationNo' ? 'reg' : 'chassis';
+      const {value: masked, cursor} = maskWithCursor(value, cursorPos, type);
+      value = masked;
+      this.setState(s => {
+        const overview = {...s.overview, [field]: value};
+        const overviewErrors = {...s.overviewErrors};
+        if(value && String(value).trim()) delete overviewErrors[field];
+        return {overview, overviewErrors};
+      });
+      requestAnimationFrame(() => { try{ el.setSelectionRange(cursor, cursor); }catch(err){} });
+      return;
+    }
     this.setState(s => {
       const overview = {...s.overview, [field]: value};
       const overviewErrors = {...s.overviewErrors};
@@ -57731,15 +57882,28 @@ class Component extends DCLogic {
     });
   };
 
+  onOverviewBlur = e => {
+    const field = e.target.dataset.field;
+    if(field !== 'registrationNo' && field !== 'chassisNo') return;
+    const raw = this.state.overview[field];
+    const masked = field === 'registrationNo' ? maskRegistrationNo(raw) : maskChassisNo(raw);
+    if(masked === raw) return;
+    this.setState(s => ({overview: {...s.overview, [field]: masked}}));
+  };
+
   onTireChange = e => {
     const key = e.target.dataset.tirekey;
     const field = e.target.dataset.tirefield;
     const value = e.target.value;
-    this.setState(s => ({tires: {...s.tires, [key]: {...s.tires[key], [field]: value}}}));
+    this.setState(s => {
+      const tireErrors = {...s.tireErrors};
+      if(value && String(value).trim()) delete tireErrors[`tire_${key}_${field}`];
+      return {tires: {...s.tires, [key]: {...s.tires[key], [field]: value}}, tireErrors};
+    });
   };
-  onRimsChange = e => this.setState({rims: e.target.value});
+  onRimsChange = e => this.setState(s => { const tireErrors = {...s.tireErrors}; delete tireErrors.rims; return {rims: e.target.value, tireErrors}; });
   onRimsRemarkChange = e => this.setState({rimsRemark: e.target.value});
-  onWheelCapsChange = e => this.setState({wheelCaps: e.target.value});
+  onWheelCapsChange = e => this.setState(s => { const tireErrors = {...s.tireErrors}; delete tireErrors.wheelCaps; return {wheelCaps: e.target.value, tireErrors}; });
   onWheelCapsRemarkChange = e => this.setState({wheelCapsRemark: e.target.value});
 
   // ---------------- images step ----------------
@@ -57817,16 +57981,16 @@ class Component extends DCLogic {
   onCommentsChange = e => this.setState({inspectorComments: e.target.value});
 
   // ---------------- scoring helpers ----------------
-  fieldValue(fieldId, item){ const a = this.state.answers[fieldId]; return a ? a.value : item.vocab[0].label; }
-  fieldBucket(fieldId, item){ const a = this.state.answers[fieldId]; return a ? a.bucket : item.vocab[0].bucket; }
+  fieldValue(fieldId, item){ const a = this.state.answers[fieldId]; return a ? a.value : ''; }
+  fieldBucket(fieldId, item){ const a = this.state.answers[fieldId]; return a ? a.bucket : ''; }
   photoView(fieldId){
     const photos = (this.state.photos[fieldId]||[]).map((src,i)=>({src, idx:i}));
     return {fieldId, photos, count: photos.length, btnLabel: photos.length ? '➕ Add More Images' : '📤 Upload Images'};
   }
-  rimsCurrentValue(){ return this.state.rims || this.schema.RIMS_VOCAB[0].label; }
-  rimsCurrentBucket(){ const v = this.rimsCurrentValue(); const o = this.schema.RIMS_VOCAB.find(x=>x.label===v); return o ? o.bucket : 'ok'; }
-  wheelCapsCurrentValue(){ return this.state.wheelCaps || this.schema.WHEELCAP_VOCAB[0].label; }
-  wheelCapsCurrentBucket(){ const v = this.wheelCapsCurrentValue(); const o = this.schema.WHEELCAP_VOCAB.find(x=>x.label===v); return o ? o.bucket : 'ok'; }
+  rimsCurrentValue(){ return this.state.rims || ''; }
+  rimsCurrentBucket(){ const v = this.state.rims; if(!v) return null; const o = this.schema.RIMS_VOCAB.find(x=>x.label===v); return o ? o.bucket : 'ok'; }
+  wheelCapsCurrentValue(){ return this.state.wheelCaps || ''; }
+  wheelCapsCurrentBucket(){ const v = this.state.wheelCaps; if(!v) return null; const o = this.schema.WHEELCAP_VOCAB.find(x=>x.label===v); return o ? o.bucket : 'ok'; }
 
   computeGridStepPercentage(step){
     let ok=0, faulty=0;
@@ -57847,7 +58011,7 @@ class Component extends DCLogic {
       if(life === '' || life == null) return;
       if(this.schema.classifyPercent(life)==='ok') ok++; else faulty++;
     });
-    [this.rimsCurrentBucket(), this.wheelCapsCurrentBucket()].forEach(b=>{ if(b==='ok') ok++; else faulty++; });
+    [this.rimsCurrentBucket(), this.wheelCapsCurrentBucket()].forEach(b=>{ if(b==null) return; if(b==='ok') ok++; else faulty++; });
     return this.schema.calcPercentageFromCounts(ok, faulty);
   }
   computeStepPercentageByKey(key){
@@ -57869,13 +58033,27 @@ class Component extends DCLogic {
     return {overallPct, condLabel: cond.label, score};
   }
 
+  isItemRequired(step, it){
+    if(it.optional) return false;
+    if(it.requiredIfKey){
+      const depFieldId = `${step.key}_${it.requiredIfKey}`;
+      const a = this.state.answers[depFieldId];
+      return !!(a && a.value === it.requiredIfValue);
+    }
+    return true;
+  }
   buildGridItemsView(step){
     return step.items.map(it=>{
       if(it.type==='group') return {isGroup:true, isField:false, groupLabel: it.label};
       const fieldId = `${step.key}_${it.key}`;
+      const required = this.isItemRequired(step, it);
+      const hasError = !!this.state.gridErrors[fieldId];
       return {
         isGroup:false, isField:true, fieldId,
         label: it.label,
+        isRequired: required,
+        labelColor: hasError ? 'var(--color-danger)' : 'var(--color-text-primary)',
+        borderColor: hasError ? 'var(--color-danger)' : 'var(--color-border-default)',
         value: this.fieldValue(fieldId, it),
         options: it.vocab.map(o=>({label:o.label})),
         remarks: this.state.remarks[fieldId] || '',
@@ -57885,15 +58063,23 @@ class Component extends DCLogic {
     });
   }
   buildTiresView(){
+    const te = this.state.tireErrors || {};
     const cards = this.schema.TIRE_POSITIONS.map(([label,key])=>{
       const t = this.state.tires[key];
       const fieldId = 'tire_'+key;
-      return {key, fieldId, label, brand:t.brand, size:t.size, life:t.life, photoView: this.photoView(fieldId)};
+      return {
+        key, fieldId, label, brand:t.brand, size:t.size, life:t.life, photoView: this.photoView(fieldId),
+        brandBorder: te[`tire_${key}_brand`] ? 'var(--color-danger)' : 'var(--color-border-default)',
+        sizeBorder: te[`tire_${key}_size`] ? 'var(--color-danger)' : 'var(--color-border-default)',
+        lifeBorder: te[`tire_${key}_life`] ? 'var(--color-danger)' : 'var(--color-border-default)',
+      };
     });
     return {
       cards,
       rimsValue: this.rimsCurrentValue(), rimsOptions: this.schema.RIMS_VOCAB.map(o=>({label:o.label})), rimsRemark: this.state.rimsRemark,
+      rimsBorder: te.rims ? 'var(--color-danger)' : 'var(--color-border-default)',
       wheelCapsValue: this.wheelCapsCurrentValue(), wheelCapOptions: this.schema.WHEELCAP_VOCAB.map(o=>({label:o.label})), wheelCapsRemark: this.state.wheelCapsRemark,
+      wheelCapsBorder: te.wheelCaps ? 'var(--color-danger)' : 'var(--color-border-default)',
     };
   }
   buildImagesView(){
@@ -57903,6 +58089,7 @@ class Component extends DCLogic {
     const gallery = filled.slice(1);
     return {
       hasCover: !!cover,
+      showImagesRequiredHint: !cover,
       cover: cover ? {id:cover.id, title:cover.title||'Untitled', src:s.imagePhotos[cover.id]} : null,
       gallery: gallery.map(e=>({id:e.id, title:e.title||'Untitled', src:s.imagePhotos[e.id]})),
     };
@@ -57941,7 +58128,6 @@ class Component extends DCLogic {
       {label:'Color', value:ov.color||'—'},
       {label:'Transmission', value:ov.transmissionType},
       {label:'Chassis Number', value:ov.chassisNo||'—'},
-      {label:'Engine Number', value:ov.engineNo||'—'},
       {label:'Inspection Date', value:req.slot.date},
       {label:'Inspection Location', value:`${req.slot.area}, ${req.contact.city}`},
     ];
@@ -58131,7 +58317,7 @@ class Component extends DCLogic {
           content.ovRegPhotoView = this.photoView('ov_registrationNo');
           content.ovChassisPhotoView = this.photoView('ov_chassisNo');
           const ovErr = s.overviewErrors || {};
-          const ovFieldKeys = ['registrationStatus','registrationNo','chassisNo','engineNo','mileage','color','fuelType','transmissionType','engineCapacity'];
+          const ovFieldKeys = ['registrationStatus','registrationNo','chassisNo','mileage','color','fuelType','transmissionType','engineCapacity'];
           content.ovBorder = {}; content.ovLabelColor = {};
           ovFieldKeys.forEach(k=>{
             content.ovBorder[k] = ovErr[k] ? 'var(--color-danger)' : 'var(--color-border-default)';
@@ -58207,7 +58393,7 @@ class Component extends DCLogic {
         isEdit: !!entryId, headerLabel: entryId ? 'Edit Photo' : 'Add Photo',
         title: title || '', previewSrc, hasPreview: !!previewSrc,
         captureBg: (title && title.trim()) ? 'var(--color-brand)' : 'var(--kb-grey-300)',
-        captureLabel: previewSrc ? 'Retake / Change Photo' : 'Capture / Upload Photo',
+        captureLabel: previewSrc ? 'Change Photo' : 'Capture / Upload Photo',
         isCover, showSetCover: !!entryId && !isCover, entryId,
       };
     }
@@ -58237,7 +58423,7 @@ class Component extends DCLogic {
       wizard,
       onExitWizard: this.onExitWizard, onToggleJumpSheet: this.onToggleJumpSheet, onGoToStep: this.onGoToStep,
       onStopPropagation: this.onStopPropagation,
-      onOverviewChange: this.onOverviewChange, onPhotoChange: this.onPhotoChange, onRemovePhoto: this.onRemovePhoto,
+      onOverviewChange: this.onOverviewChange, onOverviewBlur: this.onOverviewBlur, onPhotoChange: this.onPhotoChange, onRemovePhoto: this.onRemovePhoto,
       onOpenImgModal: this.onOpenImgModal, onRemoveImageEntry: this.onRemoveImageEntry,
       onSelectChange: this.onSelectChange, onRemarkChange: this.onRemarkChange,
       onTireChange: this.onTireChange, onRimsChange: this.onRimsChange, onRimsRemarkChange: this.onRimsRemarkChange,
