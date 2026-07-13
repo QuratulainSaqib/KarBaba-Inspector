@@ -57036,7 +57036,7 @@ function buildSeedAnswers(){
         </div>
         <button sc-camel-on-click="{{ onCloseDetail }}" style="border:none;background:var(--kb-grey-100);width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--color-text-secondary);">✕</button>
       </div>
-      <div style="margin-bottom:14px;"><span style="background:var(--color-info-bg);color:var(--color-info);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">{{ detail.typeLabel }}</span> <span style="background:var(--kb-grey-100);color:var(--color-text-secondary);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">Assigned</span></div>
+      <div style="margin-bottom:14px;"><span style="background:{{ detail.typeColorBg }};color:{{ detail.typeColorFg }};padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">{{ detail.typeLabel }}</span> <span style="background:var(--color-info-bg);color:var(--color-info);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">Assigned</span></div>
 
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--color-text-muted);font-weight:700;border-bottom:1px solid var(--color-border-subtle);padding-bottom:6px;margin-bottom:10px;">Customer Info</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:16px;">
@@ -57453,10 +57453,10 @@ const SEED_ASSIGNED = [
     slot:{area:'Peoples Colony', date:fmtDate(addDays(TODAY,3)), startTime:'9:00 AM', endTime:'10:00 AM'}, inspectionType:'sell' },
 ];
 const SEED_COMPLETED = [
-  {id:'REQ-0987', contact:{name:'Hamza Sheikh', phone:'+92 301 5566778'}, car:{make:'Toyota', model:'Camry', variant:'New', year:'2021'}, city:'Lahore', date:'11-Sep-2025', score:'7.9/10'},
-  {id:'REQ-0965', contact:{name:'Faiza Noor', phone:'+92 322 3344556'}, car:{make:'Honda', model:'City', variant:'Aspire', year:'2020'}, city:'Karachi', date:'09-Sep-2025', score:'8.4/10'},
-  {id:'REQ-0954', contact:{name:'Zeeshan Iqbal', phone:'+92 334 8899001'}, car:{make:'Suzuki', model:'Alto', variant:'VXL', year:'2022'}, city:'Islamabad', date:'07-Sep-2025', score:'6.8/10'},
-  {id:'REQ-0932', contact:{name:'Mahnoor Aziz', phone:'+92 300 2233445'}, car:{make:'Kia', model:'Sportage', variant:'AWD', year:'2023'}, city:'Lahore', date:'05-Sep-2025', score:'8.9/10'},
+  {id:'REQ-0987', contact:{name:'Hamza Sheikh', phone:'+92 301 5566778'}, car:{make:'Toyota', model:'Camry', variant:'New', year:'2021'}, city:'Lahore', date:'11-Sep-2025', score:'7.9/10', inspectionType:'sell'},
+  {id:'REQ-0965', contact:{name:'Faiza Noor', phone:'+92 322 3344556'}, car:{make:'Honda', model:'City', variant:'Aspire', year:'2020'}, city:'Karachi', date:'09-Sep-2025', score:'8.4/10', inspectionType:'inspect'},
+  {id:'REQ-0954', contact:{name:'Zeeshan Iqbal', phone:'+92 334 8899001'}, car:{make:'Suzuki', model:'Alto', variant:'VXL', year:'2022'}, city:'Islamabad', date:'07-Sep-2025', score:'6.8/10', inspectionType:'sell'},
+  {id:'REQ-0932', contact:{name:'Mahnoor Aziz', phone:'+92 300 2233445'}, car:{make:'Kia', model:'Sportage', variant:'AWD', year:'2023'}, city:'Lahore', date:'05-Sep-2025', score:'8.9/10', inspectionType:'inspect'},
 ];
 
 const TIRE_KEYS = ['FrontLeft','FrontRight','RearLeft','RearRight','Spare'];
@@ -57940,7 +57940,7 @@ class Component extends DCLogic {
     try{ localStorage.setItem('karbaba_report_'+req.id, JSON.stringify(data)); }catch(e){}
     this.setState(s => ({
       assignedData: s.assignedData.filter(r=>r.id!==req.id),
-      pendingData: [{id:req.id, contact:req.contact, car:req.car, city:req.contact.city, date: TODAY_STR}, ...s.pendingData],
+      pendingData: [{id:req.id, contact:req.contact, car:req.car, city:req.contact.city, date: TODAY_STR, inspectionType:req.inspectionType}, ...s.pendingData],
       confirmModal: 'success',
     }));
   };
@@ -58005,7 +58005,10 @@ class Component extends DCLogic {
         carLine:`${r.car.make} ${r.car.model}`, carSub:`${r.car.variant} · ${r.car.year}`,
         city:r.city, hasDate:true, dateLine:r.date,
         statusLabel:'Awaiting Approval', statusBg:'var(--color-warning-bg)', statusFg:'#8a5b00',
-        hasTypeBadge:false, hasScore:false, showViewReport:true,
+        hasTypeBadge:true, typeLabel: r.inspectionType==='sell' ? 'Sell By KarBaba':'Only Inspection',
+        typeColorBg: r.inspectionType==='sell' ? 'var(--color-success-bg)' : 'var(--color-info-bg)',
+        typeColorFg: r.inspectionType==='sell' ? 'var(--color-success)' : 'var(--color-info)',
+        hasScore:false, showViewReport:true,
       }));
     } else {
       rows = s.completedData.map(r=>({
@@ -58013,7 +58016,10 @@ class Component extends DCLogic {
         carLine:`${r.car.make} ${r.car.model}`, carSub:`${r.car.variant} · ${r.car.year}`,
         city:r.city, hasDate:true, dateLine:r.date,
         statusLabel:'Completed', statusBg:'var(--color-success-bg)', statusFg:'var(--color-success)',
-        hasTypeBadge:false, hasScore:true, score:r.score, showViewReport:true,
+        hasTypeBadge:true, typeLabel: r.inspectionType==='sell' ? 'Sell By KarBaba':'Only Inspection',
+        typeColorBg: r.inspectionType==='sell' ? 'var(--color-success-bg)' : 'var(--color-info-bg)',
+        typeColorFg: r.inspectionType==='sell' ? 'var(--color-success)' : 'var(--color-info)',
+        hasScore:true, score:r.score, showViewReport:true,
       }));
     }
     const emptyMsg = s.activeTab==='assigned' ? 'No inspections assigned yet.' : s.activeTab==='pending' ? 'No inspections pending admin approval.' : 'No completed inspections yet.';
@@ -58024,6 +58030,8 @@ class Component extends DCLogic {
       if(r){
         detail = {
           typeLabel: r.inspectionType==='sell' ? 'Sell By KarBaba' : 'Only Inspection',
+          typeColorBg: r.inspectionType==='sell' ? 'var(--color-success-bg)' : 'var(--color-info-bg)',
+          typeColorFg: r.inspectionType==='sell' ? 'var(--color-success)' : 'var(--color-info)',
           contact: [ {label:'Customer Name', value:r.contact.name}, {label:'Phone', value:r.contact.phone}, {label:'City', value:r.contact.city}, {label:'Address', value:r.contact.address} ],
           car: [ {label:'Make & Model', value:`${r.car.make} ${r.car.model}`}, {label:'Model Year', value:r.car.year}, {label:'Assembly', value:r.car.assembly}, {label:'Registered In', value:r.car.registeredIn} ],
           slot: [ {label:'Area of City', value:`${r.slot.area}, ${r.contact.city}`}, {label:'Inspection Date', value:r.slot.date}, {label:'Inspection Time', value:r.slot.startTime} ],
