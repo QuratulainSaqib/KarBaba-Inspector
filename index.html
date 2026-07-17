@@ -58495,11 +58495,13 @@ class Component extends DCLogic {
 
     let rows = [];
     if(s.activeTab==='assigned'){
-      rows = s.assignedData.map(r=>({
+      rows = s.assignedData.map((r,idx)=>({
         id:r.id, name:r.contact.name, phone:r.contact.phone,
         carLine:`${r.car.make} ${r.car.model}`, carSub:`${r.car.variant} · ${r.car.year}`,
         city:r.contact.city, hasDate:true, dateLine:`${r.slot.date}, ${r.slot.startTime}`,
-        statusLabel:'Assigned', statusBg:'var(--color-info-bg)', statusFg:'var(--color-info)',
+        statusLabel: idx===1 ? 'In Progress' : 'Assigned',
+        statusBg: idx===1 ? '#fff3e0' : 'var(--color-info-bg)',
+        statusFg: idx===1 ? '#c2660d' : 'var(--color-info)',
         hasTypeBadge:true, typeLabel: r.inspectionType==='sell' ? 'Sell By KarBaba':'Only Inspection',
         typeColorBg: r.inspectionType==='sell' ? 'var(--color-success-bg)' : 'var(--color-info-bg)',
         typeColorFg: r.inspectionType==='sell' ? 'var(--color-success)' : 'var(--color-info)',
