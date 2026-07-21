@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KarBaba — Car Inspection Report</title>
+<style>
+  :root{
+    --green: #1e7a5f;
+    --green-dark: #14523f;
+    --ink: #1a1d1f;
+    --muted: #8b9198;
+    --bg: #f2f3f5;
+    --card-bg: #ffffff;
+    --border: #e6e8eb;
+    --warn-bg: #fdf6e3;
+    --warn-text: #6b4e16;
+    --link: #2f6fed;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .page {
+    padding: 0 160px 48px;
+  }
+
+  /* Header */
+  header.topbar {
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 40px;
+    border-radius: 0 0 var(--radius) var(--radius);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  .logo svg { flex-shrink: 0; }
+
+  .logo-img {
+    height: 34px;
+    width: auto;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .logo .kar { color: var(--ink); }
+  .logo .baba { color: var(--green); }
+
+  header.topbar h1 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .header-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* Vehicle title */
+  .vehicle-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin: 32px 0 18px;
+  }
+
+  /* Main grid */
+  .main-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.1fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .car-photo {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #cfd3d6;
+    min-height: 420px;
+    position: relative;
+  }
+
+  .car-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+  }
+
+  .car-photo svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Rating card */
+  .rating-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+
+  .rating-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .rating-top h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .qr {
+    flex-shrink: 0;
+  }
+
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px 0 4px;
+  }
+
+  .gauge-wrap svg {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+  }
+
+  .gauge-score {
+    text-align: center;
+    margin-top: -88px;
+  }
+
+  .gauge-score .num {
+    font-size: 4.4rem;
+    font-weight: 800;
+    color: var(--green);
+  }
+
+  .gauge-score .den {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .gauge-score .label {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 1.15rem;
+  }
+
+  .notice {
+    margin-top: 20px;
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .notice svg {
+    flex-shrink: 0;
+  }
+
+  .notice a {
+    color: var(--link);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .notice a:hover { text-decoration: underline; }
+
+  .notice b { color: var(--warn-text); }
+
+  /* Responsive */
+  @media (max-width: 860px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+    }
+    .car-photo { min-height: 300px; }
+    header.topbar {
+      padding: 22px 24px;
+    }
+    header.topbar h1 { font-size: 1.5rem; }
+  }
+
+  @media (max-width: 900px) {
+    .page { padding: 0 60px 40px; }
+  }
+
+  @media (max-width: 480px) {
+    .page { padding: 0 14px 32px; }
+    header.topbar {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    header.topbar h1 { font-size: 1.3rem; }
+    .vehicle-title { font-size: 1.35rem; margin: 24px 0 14px; }
+    .rating-card { padding: 22px 20px 20px; }
+    .rating-top { flex-direction: column; gap: 14px; }
+    .gauge-score .num { font-size: 3.4rem; }
+    .gauge-score { margin-top: -66px; }
+    .car-photo { min-height: 220px; }
+  }  /* ===== Section cards (ratings / overview) ===== */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px 30px;
+    margin-top: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+
+  .card-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 0 26px;
+    color: var(--ink);
+  }
+
+  /* Rating rings */
+  .ratings-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px 16px;
+  }
+
+  .rating-item {
+    flex: 1 1 100px;
+    min-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: 92px;
+    height: 92px;
+  }
+
+  .ring-wrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .ring-percent {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2b2f33;
+  }
+
+  .rating-name {
+    font-size: 0.92rem;
+    color: #4b5157;
+    line-height: 1.3;
+  }
+
+  /* Car overview grid */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 32px;
+  }
+
+  .overview-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .overview-item .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6c7580;
+    font-size: 0.98rem;
+    white-space: nowrap;
+  }
+
+  .overview-item .left svg {
+    flex-shrink: 0;
+  }
+
+  .overview-item .value {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.98rem;
+    text-align: right;
+  }
+
+  /* Inspector comments notice */
+  .notice.comments {
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+    margin-top: 24px;
+  }
+
+  .notice.comments svg {
+    margin-top: 3px;
+  }
+
+  @media (max-width: 900px) {
+    .overview-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    .card { padding: 22px 20px 24px; }
+    .card-title { font-size: 1.15rem; margin-bottom: 20px; }
+    .ring-wrap { width: 76px; height: 76px; }
+    .ring-percent { font-size: 0.85rem; }
+    .rating-item { min-width: 76px; }
+  }
+  /* ===== Exterior Condition diagram ===== */
+  .card-subtext {
+    margin: -14px 0 26px;
+    color: #6c7580;
+    font-size: 0.95rem;
+  }
+
+  .exterior-diagram-wrap {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .exterior-diagram-wrap svg.car-svg,
+  .exterior-diagram-wrap img.car-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  .marker {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-left: -15px;
+    margin-top: -15px;
+    border-radius: 50%;
+    background: #6fbf8b;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  .connector {
+    position: absolute;
+    height: 1.5px;
+    background: #333;
+    transform-origin: left center;
+    opacity: 0;
+    transition: opacity .15s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .marker:hover ~ .connector,
+  .marker:focus ~ .connector {
+    opacity: 1;
+  }
+
+  .tooltip-box {
+    position: absolute;
+    width: 210px;
+    background: #ffffff;
+    border: 1px solid #1a1d1f;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+    z-index: 4;
+    text-align: center;
+  }
+
+  .marker:hover ~ .tooltip-box,
+  .marker:focus ~ .tooltip-box {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .tooltip-box .tooltip-img {
+    width: 100%;
+    height: 130px;
+    display: block;
+    object-fit: cover;
+    border-bottom: 1px solid #1a1d1f;
+  }
+
+  .tooltip-box .tooltip-caption {
+    font-size: 0.78rem;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1d1f;
+    color: #333;
+  }
+
+  .tooltip-box .tooltip-label {
+    font-size: 1.05rem;
+    padding: 10px 0;
+    color: #1a1d1f;
+  }
+
+  .marker-group {
+    position: absolute;
+  }
+
+  .marker-group .marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .marker-group .connector {
+    position: absolute;
+    left: -0.75px;
+    top: 15px;
+    width: 1.5px;
+    height: 18px;
+    background: #333;
+  }
+
+  .marker-group .tooltip-box {
+    position: absolute;
+  }
+
+  .marker-group:hover .connector,
+  .marker-group:focus-within .connector,
+  .marker-group:hover .tooltip-box,
+  .marker-group:focus-within .tooltip-box {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .tooltip-box .tooltip-img {
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .tooltip-box .tooltip-img:hover {
+    opacity: 0.85;
+  }
+
+  .legend-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 36px 0 18px;
+    color: var(--ink);
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 18px;
+    column-gap: 20px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .legend-item .legend-label {
+    color: #7a8794;
+    font-size: 0.98rem;
+  }
+
+  .legend-item .legend-code {
+    color: #1a1d1f;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 900px) {
+    .legend-grid { grid-template-columns: repeat(2, 1fr); }
+    .tooltip-box { width: 160px; }
+    .tooltip-box .tooltip-img { height: 100px; }
+  }
+
+  @media (max-width: 560px) {
+    .legend-grid { grid-template-columns: 1fr; }
+    .marker { width: 26px; height: 26px; margin-left: -13px; margin-top: -13px; font-size: 0.65rem; }
+    .tooltip-box { width: 140px; }
+    .tooltip-box .tooltip-img { height: 80px; }
+    .tooltip-box .tooltip-label { font-size: 0.9rem; padding: 6px 0; }
+    .tooltip-box .tooltip-caption { font-size: 0.68rem; }
+  }
+  /* ===== Exterior checklist card ===== */
+  .exterior-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 24px;
+  }
+
+  .exterior-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ececec;
+    padding: 22px 28px;
+    cursor: pointer;
+  }
+
+  .exterior-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .exterior-header .pct-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1d1f;
+  }
+
+  .exterior-header .pct-wrap svg {
+    color: #6c7580;
+  }
+
+  .exterior-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .exterior-columns > div:first-child {
+    border-right: 1px solid var(--border);
+  }
+
+  .exterior-columns > div > .ex-item:last-child {
+    border-bottom: none;
+  }
+
+  .ex-item {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ex-item-main {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .ex-item-label {
+    flex: 1;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .ex-item-label .name {
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .ex-item-status {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 24px;
+    font-size: 0.98rem;
+    color: #333;
+    text-align: center;
+  }
+
+  .ex-item-status.good {
+    background: #eaf3ec;
+  }
+
+  .ex-item-status.warn {
+    background: #fdf6e3;
+  }
+
+  .ex-item-status.bad {
+    background: #fbeaea;
+  }
+
+  .ex-remarks {
+    padding: 0 24px 16px;
+  }
+
+  .ex-remarks .r-label {
+    color: #8a97a6;
+    font-size: 0.85rem;
+    margin-bottom: 3px;
+  }
+
+  .r-text-wrap {
+    max-width: 100%;
+  }
+
+  .ex-remarks .r-text {
+    font-size: 0.92rem;
+    color: #3a3f44;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: max-height 0.15s ease;
+  }
+
+  .ex-remarks .r-text.expanded {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .ex-remarks .r-more {
+    display: block;
+    margin-top: 4px;
+    color: #2f6fed;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .ex-remarks .more {
+    color: #2f6fed;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .view-image-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 0.88rem;
+    color: #6c7580;
+    background: #ffffff;
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  @media (max-width: 900px) {
+    .exterior-columns { grid-template-columns: 1fr; }
+    .exterior-columns > div:first-child { border-right: none; }
+  }
+
+  @media (max-width: 560px) {
+    .exterior-header { padding: 18px 20px; }
+    .exterior-header h3 { font-size: 1.1rem; }
+    .ex-item-label, .ex-item-status { padding: 14px 16px; }
+  }
+  .ex-subheader {
+    background: #f2f3f4;
+    padding: 16px 28px;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ex-subheader:not(:first-child) {
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 560px) {
+    .ex-subheader { padding: 14px 20px; font-size: 1.02rem; }
+  }
+  .tire-item {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tire-item:last-child {
+    border-bottom: none;
+  }
+
+  .tire-label {
+    flex: 0 0 26%;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .tire-label .name {
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .tire-values {
+    flex: 1;
+    display: flex;
+  }
+
+  .tire-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    background: #eaf3ec;
+    border-left: 1px solid rgba(0,0,0,0.05);
+    font-size: 0.98rem;
+    color: #333;
+    text-align: center;
+  }
+
+  .tire-value.warn { background: #fdf6e3; }
+  .tire-value.bad { background: #fbeaea; }
+
+  .tire-value:first-child {
+    border-left: none;
+  }
+
+  @media (max-width: 900px) {
+    .tire-item { flex-direction: column; }
+    .tire-label { flex: none; padding-bottom: 8px; }
+    .tire-values { flex-direction: column; }
+    .tire-value { border-left: none; border-top: 1px solid var(--border); }
+    .tire-value:first-child { border-top: none; }
+  }
+  .req-star {
+    display: none;
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 28px;
+  }
+
+  .gallery-item figure {
+    margin: 0;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 480px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    cursor: pointer;
+  }
+
+  .gallery-item figcaption {
+    text-align: center;
+    margin-top: 14px;
+    color: var(--ink);
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 900px) {
+    .gallery-grid { grid-template-columns: 1fr; padding: 20px; }
+    .gallery-item img { height: 320px; }
+  }
+  .disclaimer-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px 32px;
+    margin-top: 24px;
+  }
+
+  .disclaimer-card h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 0 20px;
+    color: var(--ink);
+  }
+
+  .disclaimer-card p {
+    margin: 0 0 4px;
+    color: #3a3f44;
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  .disclaimer-card a {
+    color: var(--link);
+    text-decoration: none;
+  }
+
+  .disclaimer-card a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 560px) {
+    .disclaimer-card { padding: 22px 20px 26px; }
+    .disclaimer-card h3 { font-size: 1.15rem; }
+  }
+  .exterior-card.collapsed > *:not(.exterior-header) {
+    display: none;
+  }
+
+  .exterior-header svg {
+    transition: transform 0.2s ease;
+  }
+
+  .exterior-card.collapsed .exterior-header svg {
+    transform: rotate(-90deg);
+  }
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 14, 0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 40px;
+  }
+
+  .lightbox-overlay.active {
+    display: flex;
+  }
+
+  .lightbox-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .lightbox-caption {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-align: center;
+    margin-bottom: 16px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  .lightbox-img-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 72vh;
+  }
+
+  .lightbox-img-wrap img {
+    max-width: 100%;
+    max-height: 72vh;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    animation: lightboxIn 0.18s ease;
+    display: block;
+  }
+
+  .lightbox-tag-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(0,0,0,0.68);
+    color: #fff;
+    padding: 6px 16px 6px 6px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .lightbox-tag-badge .tag-badge-circle {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-tag-badge .tag-badge-text {
+    font-size: 0.9rem;
+  }
+
+  @keyframes lightboxIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: #1f2124;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.55);
+    z-index: 10001;
+  }
+
+  .lightbox-close:hover {
+    background: #34373b;
+  }
+
+  .lightbox-close svg {
+    display: block;
+    pointer-events: none;
+  }
+
+  .lightbox-nav {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-nav:hover {
+    background: rgba(255,255,255,0.22);
+  }
+
+  .lightbox-nav.prev { left: 12px; }
+  .lightbox-nav.next { right: 12px; }
+
+  .lightbox-counter {
+    color: #fff;
+    background: rgba(0,0,0,0.45);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 14px;
+    display: none;
+  }
+
+  .lightbox-thumbs {
+    display: none;
+    gap: 8px;
+    margin-top: 14px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 2px;
+  }
+
+  .lightbox-thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0.55;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+  }
+
+  .lightbox-thumb.active {
+    opacity: 1;
+    border-color: var(--green);
+  }
+
+  @media (max-width: 560px) {
+    .lightbox-overlay { padding: 16px; }
+    .lightbox-close { top: 12px; right: 12px; width: 38px; height: 38px; font-size: 1.3rem; }
+    .lightbox-caption { font-size: 1.05rem; }
+    .lightbox-nav { width: 38px; height: 38px; font-size: 1.15rem; }
+    .lightbox-nav.prev { left: 4px; }
+    .lightbox-nav.next { right: 4px; }
+  }
+
+  .empty-state {
+    color: var(--muted);
+    font-size: 0.95rem;
+    padding: 8px 0 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="page" id="page">
+  <p style="padding:60px 0; text-align:center; color:#8b9198;">Loading report…</p>
+</div>
+
+<div id="imgLightbox" class="lightbox-overlay">
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+  </button>
+  <div class="lightbox-content">
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+    <div class="lightbox-img-wrap">
+      <button class="lightbox-nav prev" onclick="lightboxPrev(event)" aria-label="Previous image">&#10094;</button>
+      <img id="lightboxImg" src="" alt="Preview">
+      <div class="lightbox-tag-badge" id="lightboxTagBadge"></div>
+      <button class="lightbox-nav next" onclick="lightboxNext(event)" aria-label="Next image">&#10095;</button>
+    </div>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+    <div class="lightbox-thumbs" id="lightboxThumbs"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   KarBaba — Car Inspection Report (data-driven)
+   Reads ?req=<id> from the URL, loads karbaba_report_<id> from
+   localStorage (written by index.html's onFinalizeSubmission), and
+   renders every section from that data. If nothing is found (no id,
+   or a seed/demo request that was never actually inspected through
+   the wizard), it falls back to DEMO_DATA below so the page still
+   shows a complete example instead of a blank page.
+   ===================================================================== */
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+var PLACEHOLDER_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><rect width="400" height="260" fill="#dfe3e6"/>' +
+  '<g fill="#aab1b8"><rect x="60" y="150" width="280" height="16" rx="8"/>' +
+  '<path d="M100 150c0-35 30-60 100-60s100 25 100 60" fill="none" stroke="#aab1b8" stroke-width="14"/>' +
+  '<circle cx="130" cy="170" r="18"/><circle cx="270" cy="170" r="18"/></g></svg>'
+);
+
+/* Tag vocabulary (KarBaba exterior-condition marker codes), copied from
+   the same TAG_COLORS / TAG_GROUPS tables used by index.html's inspection
+   schema, so codes render with the same colors & descriptions everywhere. */
+var TAG_INFO = {
+  A1:{label:'Small Scratch',color:'#22c55e'}, A2:{label:'Scratch',color:'#f59e0b'}, A3:{label:'Big Scratch',color:'#ef4444'},
+  B1:{label:'Small dent with scratch (thumb size)',color:'#f97316'}, B2:{label:'Dent with scratch (hand size)',color:'#ef4444'}, B3:{label:'Big dent with scratch (elbow size)',color:'#ef4444'},
+  C1:{label:'Corrosion',color:'#ef4444'}, C2:{label:'Heavy Corrosion',color:'#ef4444'},
+  E1:{label:'Few Dimples',color:'#22c55e'}, E2:{label:'Several Dimples',color:'#f59e0b'}, E3:{label:'Many Dimples',color:'#ef4444'},
+  G:{label:'Stone chip in glass',color:'#f59e0b'},
+  H:{label:'Paint faded',color:'#f97316'},
+  P:{label:'Paint marked',color:'#f59e0b'},
+  R:{label:'Repaired crack on windshield',color:'#f97316'}, RX:{label:'Repaired crack (needs replacement)',color:'#f97316'},
+  S1:{label:'Rust',color:'#f59e0b'}, S2:{label:'Heavy Rust',color:'#ef4444'},
+  U1:{label:'Small Dent',color:'#22c55e'}, U2:{label:'Dent',color:'#f59e0b'}, U3:{label:'Big Dent',color:'#ef4444'},
+  W1:{label:'Repair mark (hardly detectable)',color:'#22c55e'}, W2:{label:'Repair mark',color:'#f59e0b'}, W3:{label:'Obvious repair mark (needs repaint)',color:'#ef4444'},
+  X:{label:'Need to be replaced',color:'#374151'}, X1:{label:'Small crack on windshield (~1cm)',color:'#22c55e'}, XX:{label:'Replaced',color:'#3b82f6'},
+  Y1:{label:'Small hole or crack',color:'#f97316'}, Y2:{label:'Hole or crack',color:'#ef4444'}, Y3:{label:'Big hole or crack',color:'#ef4444'}
+};
+
+/* Engine & Transmission / Suspension & Steering are shown with sub-headers
+   in the report even though index.html's collectAllData() returns them as
+   one flat array — the split sizes below mirror the fixed group boundaries
+   in index.html's FORM_SCHEMA (Engine has 17 items, Transmission & Clutch
+   has 8; Front Suspension 13, Rear Suspension 4, Steering 3). */
+var SUBGROUPS = {
+  engine: [{label:'Engine', count:17}, {label:'Transmission & Clutch', count:8}],
+  suspension: [{label:'Front Suspension', count:13}, {label:'Rear Suspension', count:4}, {label:'Steering', count:3}]
+};
+
+var OVERVIEW_ICONS = {
+  'Customer Name': '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  'Engine Capacity': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.96 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9.04 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.3 4.7a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.5.5.92 1.04 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/>',
+  'Registered City': '<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M4 21h11"/><path d="M9 21v-5H6v5"/><rect x="7" y="7" width="5" height="4"/>',
+  'Inspection Date': '<rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>',
+  'Registration Number': '<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9.5" x2="7" y2="9.5" stroke-width="2.4"/><line x1="7" y1="14" x2="12" y2="14"/><line x1="7" y1="16.5" x2="10" y2="16.5"/>',
+  'Chassis Number': '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+  'Mileage': '<path d="M12 12l4-4"/><circle cx="12" cy="13" r="8.5"/><path d="M8.2 13.2a4 4 0 0 1 7.6 0"/>',
+  'Color': '<path d="M12 2C8 7 5 10.5 5 14a7 7 0 0 0 14 0c0-3.5-3-7-7-12z"/>',
+  'Fuel Type': '<path d="M5 21V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v13"/><path d="M5 21h8"/><path d="M13 11h3a2 2 0 0 1 2 2v4.5a1.5 1.5 0 0 0 3 0V10l-2.5-2.5"/><line x1="6" y1="6" x2="9" y2="6"/>',
+  'Transmission': '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+  'Assembly': '<path d="M3 21V10l6 4V10l6 4V8l6 4v9H3z"/>',
+  'Inspection Location': '<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M4 21h11"/><path d="M9 21v-5H6v5"/><rect x="7" y="7" width="5" height="4"/>'
+};
+var OVERVIEW_ORDER = ['Customer Name','Engine Capacity','Registered City','Inspection Date','Registration Number','Chassis Number','Mileage','Color','Fuel Type','Transmission','Assembly','Inspection Location'];
+
+var VIEW_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+var CHEVRON_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+var WARN_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L1 21h22L12 2z" stroke="#b8860b" stroke-width="1.6" stroke-linejoin="round" fill="#f6e6b4"/><rect x="11.1" y="9" width="1.8" height="6" fill="#7a5b12"/><rect x="11.1" y="16.4" width="1.8" height="1.8" fill="#7a5b12"/></svg>';
+
+/* ---------------- rating colors (rings, same thresholds as index.html's getRatingColor) ---------------- */
+function ratingColor(pct){
+  if(pct===null || pct===undefined) return {stroke:'#c7ccd1', bg:'#e4e6e8'};
+  if(pct>=90) return {stroke:'#2fa876', bg:'#cdead9'};
+  if(pct>=70) return {stroke:'#2f7fe0', bg:'#d9e6fb'};
+  if(pct>=30) return {stroke:'#f0a93e', bg:'#faecc7'};
+  return {stroke:'#c94060', bg:'#f6dde3'};
+}
+function statusCls(cls){ return cls==='ok' ? 'good' : (cls==='warn' ? 'warn' : 'bad'); }
+
+/* ---------------- remarks (real truncate + expand, hidden entirely if empty) ---------------- */
+var LB_REGISTRY = [];
+function renderRemarks(text){
+  var t = (text||'').trim();
+  if(!t) return '';
+  var needsToggle = t.length > 70;
+  return '<div class="ex-remarks"><div class="r-label">Remarks</div><div class="r-text-wrap">' +
+    '<div class="r-text">' + escapeHtml(t) + '</div>' +
+    (needsToggle ? '<span class="r-more" onclick="toggleRemark(this)">More</span>' : '') +
+    '</div></div>';
+}
+function toggleRemark(btn){
+  var textEl = btn.previousElementSibling;
+  var expanded = textEl.classList.toggle('expanded');
+  btn.textContent = expanded ? 'Less' : 'More';
+}
+
+/* ---------------- lightbox (per-item photo arrays, no shared placeholder) ---------------- */
+var lbImages = [], lbTags = [], lbIndex = 0, lbLabel = '';
+function registerLightbox(label, images, tags){
+  var idx = LB_REGISTRY.length;
+  LB_REGISTRY.push({label: label, images: images, tags: tags || []});
+  return idx;
+}
+function openLightboxByIndex(regIdx, startIndex){
+  var entry = LB_REGISTRY[regIdx];
+  if(!entry || !entry.images.length) return;
+  lbImages = entry.images; lbTags = entry.tags; lbLabel = entry.label;
+  lbIndex = (typeof startIndex === 'number' && startIndex >= 0 && startIndex < lbImages.length) ? startIndex : 0;
+  renderLightbox();
+  document.getElementById('imgLightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function renderLightbox(){
+  document.getElementById('lightboxImg').src = lbImages[lbIndex];
+  document.getElementById('lightboxCaption').textContent = lbLabel;
+
+  var tagBadge = document.getElementById('lightboxTagBadge');
+  if(lbTags && lbTags.length){
+    var t = lbTags[lbIndex];
+    if(t){
+      tagBadge.innerHTML = '<span class="tag-badge-circle" style="background:' + t.color + ';">' + escapeHtml(t.code) + '</span><span class="tag-badge-text">' + escapeHtml(t.label) + '</span>';
+      tagBadge.style.display = 'flex';
+    } else tagBadge.style.display = 'none';
+  } else tagBadge.style.display = 'none';
+
+  var counter = document.getElementById('lightboxCounter');
+  var prevBtn = document.querySelector('.lightbox-nav.prev');
+  var nextBtn = document.querySelector('.lightbox-nav.next');
+  var thumbs = document.getElementById('lightboxThumbs');
+
+  if(lbImages.length > 1){
+    counter.style.display = 'block';
+    counter.textContent = (lbIndex + 1) + ' / ' + lbImages.length;
+    prevBtn.style.display = 'flex'; nextBtn.style.display = 'flex'; thumbs.style.display = 'flex';
+    thumbs.innerHTML = lbImages.map(function(src, i){
+      return '<img src="' + src + '" class="lightbox-thumb' + (i === lbIndex ? ' active' : '') + '" onclick="lightboxGoTo(' + i + ')">';
+    }).join('');
+  } else {
+    counter.style.display = 'none'; prevBtn.style.display = 'none'; nextBtn.style.display = 'none';
+    thumbs.style.display = 'none'; thumbs.innerHTML = '';
+  }
+}
+function lightboxPrev(e){ if(e) e.stopPropagation(); lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length; renderLightbox(); }
+function lightboxNext(e){ if(e) e.stopPropagation(); lbIndex = (lbIndex + 1) % lbImages.length; renderLightbox(); }
+function lightboxGoTo(i){ lbIndex = i; renderLightbox(); }
+function closeLightbox(){ document.getElementById('imgLightbox').classList.remove('active'); document.body.style.overflow = ''; }
+document.addEventListener('keydown', function(e){
+  if(!document.getElementById('imgLightbox').classList.contains('active')) return;
+  if(e.key === 'Escape') closeLightbox();
+  if(e.key === 'ArrowLeft') lightboxPrev();
+  if(e.key === 'ArrowRight') lightboxNext();
+});
+
+/* ---------------- section renderers ---------------- */
+function renderExItem(it){
+  var photos = it.photos || [];
+  var btn = '';
+  if(photos.length){
+    var regIdx = registerLightbox(it.item, photos);
+    btn = ' <button class="view-image-btn" type="button" onclick="openLightboxByIndex(' + regIdx + ',0)">' + VIEW_ICON + ' View Image</button>';
+  }
+  return '<div class="ex-item"><div class="ex-item-main">' +
+    '<div class="ex-item-label"><span class="name">' + escapeHtml(it.item) + '</span>' + btn + '</div>' +
+    '<div class="ex-item-status ' + statusCls(it.cls) + '">' + escapeHtml(it.status || '—') + '</div>' +
+    '</div>' + renderRemarks(it.remarks) + '</div>';
+}
+function twoColRows(items){
+  var col1 = items.filter(function(_, i){ return i % 2 === 0; });
+  var col2 = items.filter(function(_, i){ return i % 2 === 1; });
+  return '<div class="exterior-columns"><div>' + col1.map(renderExItem).join('') + '</div><div>' + col2.map(renderExItem).join('') + '</div></div>';
+}
+function renderChecklistCard(title, key, items, pctByKey){
+  if(!items || !items.length){
+    return '<div class="exterior-card"><div class="exterior-header"><h3>' + escapeHtml(title) + '</h3></div><div class="empty-state" style="padding:16px 28px;">No data recorded.</div></div>';
+  }
+  var pct = pctByKey[key];
+  var pctText = (pct===null || pct===undefined) ? '—' : pct + '%';
+  var body;
+  if(SUBGROUPS[key]){
+    var offset = 0, parts = [];
+    SUBGROUPS[key].forEach(function(g){
+      var slice = items.slice(offset, offset + g.count);
+      offset += g.count;
+      parts.push('<div class="ex-subheader">' + escapeHtml(g.label) + '</div>' + twoColRows(slice));
+    });
+    body = parts.join('');
+  } else {
+    body = twoColRows(items);
+  }
+  return '<div class="exterior-card"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">' +
+    '<h3>' + escapeHtml(title) + '</h3><div class="pct-wrap">' + pctText + ' ' + CHEVRON_ICON + '</div></div>' + body + '</div>';
+}
+function renderTiresCard(data, pctByKey){
+  var tires = data.tires || [];
+  var rows = tires.map(function(t){
+    var photos = t.photos || [];
+    var btn = '';
+    if(photos.length){
+      var regIdx = registerLightbox(t.pos, photos);
+      btn = ' <button class="view-image-btn" type="button" onclick="openLightboxByIndex(' + regIdx + ',0)">' + VIEW_ICON + ' View Image</button>';
+    }
+    return '<div class="tire-item"><div class="tire-label"><span class="name">' + escapeHtml(t.pos) + '</span>' + btn + '</div>' +
+      '<div class="tire-values">' +
+      '<div class="tire-value ' + statusCls(t.cls) + '">' + escapeHtml(t.brand || '—') + '</div>' +
+      '<div class="tire-value ' + statusCls(t.cls) + '">' + escapeHtml(t.size || '—') + '</div>' +
+      '<div class="tire-value ' + statusCls(t.cls) + '">' + escapeHtml(t.life || t.status || '—') + ' Remaining Life</div>' +
+      '</div></div>';
+  }).join('');
+  rows += '<div class="tire-item"><div class="tire-label"><span class="name">Rims</span></div><div class="tire-values"><div class="tire-value ' + statusCls(data.rimsCls) + '">' + escapeHtml(data.rims || '—') + '</div></div></div>';
+  rows += renderRemarks(data.rimsRemarks);
+  rows += '<div class="tire-item"><div class="tire-label"><span class="name">Wheel Caps</span></div><div class="tire-values"><div class="tire-value ' + statusCls(data.wheelCapsCls) + '">' + escapeHtml(data.wheelCaps || '—') + '</div></div></div>';
+  rows += renderRemarks(data.wheelCapsRemarks);
+  var pct = pctByKey['tires'];
+  var pctText = (pct===null || pct===undefined) ? '—' : pct + '%';
+  return '<div class="exterior-card"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">' +
+    '<h3>Tires</h3><div class="pct-wrap">' + pctText + ' ' + CHEVRON_ICON + '</div></div>' + rows + '</div>';
+}
+function renderOverviewGrid(overview){
+  var byLabel = {};
+  (overview||[]).forEach(function(o){ byLabel[o.label] = o.value; });
+  var html = OVERVIEW_ORDER.filter(function(label){ return byLabel[label] !== undefined; }).map(function(label){
+    var icon = OVERVIEW_ICONS[label] || '<circle cx="12" cy="12" r="9"/>';
+    return '<div class="overview-item"><span class="left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b95a1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + icon + '</svg>' + escapeHtml(label) + '</span><span class="value">' + escapeHtml(byLabel[label]) + '</span></div>';
+  }).join('');
+  return html;
+}
+function tooltipPos(x, y){
+  var left = x > 50 ? -225 : 24;
+  var top = y > 75 ? -206 : 24;
+  return 'left:' + left + 'px; top:' + top + 'px;';
+}
+function renderExteriorDiagram(data){
+  var tags = data.exteriorTags || [];
+  var markersHtml = tags.map(function(t, i){
+    var info = TAG_INFO[t.code] || {label: t.code, color: '#ef4444'};
+    var img = '';
+    if(t.photo){
+      var regIdx = registerLightbox('Exterior Condition — ' + info.label, tags.filter(function(x){return x.photo;}).map(function(x){return x.photo;}), tags.filter(function(x){return x.photo;}).map(function(x){ var ci = TAG_INFO[x.code]||{label:x.code,color:'#ef4444'}; return {code:x.code, color:ci.color, label:ci.label}; }));
+      var photoIdxWithinFiltered = tags.filter(function(x){return x.photo;}).findIndex(function(x){return x.id===t.id;});
+      img = '<img class="tooltip-img" src="' + t.photo + '" alt="' + escapeHtml(info.label) + '" onclick="openLightboxByIndex(' + regIdx + ',' + photoIdxWithinFiltered + ')"><div class="tooltip-caption">Click to Enlarge</div>';
+    }
+    return '<div class="marker-group" style="left:' + t.x + '%; top:' + t.y + '%;">' +
+      '<div class="marker" tabindex="0" style="background:' + info.color + ';">' + escapeHtml(t.code) + '</div>' +
+      '<div class="connector"></div>' +
+      '<div class="tooltip-box" style="' + tooltipPos(t.x, t.y) + '">' + img + '<div class="tooltip-label">' + escapeHtml(info.label) + (t.remark ? ' — ' + escapeHtml(t.remark) : '') + '</div></div>' +
+      '</div>';
+  }).join('');
+
+  var usedCodes = Array.from(new Set(tags.map(function(t){ return t.code; })));
+  var legendHtml = usedCodes.map(function(code){
+    var info = TAG_INFO[code] || {label: code};
+    return '<div class="legend-item"><span class="legend-label">' + escapeHtml(info.label) + '</span><span class="legend-code">' + escapeHtml(code) + '</span></div>';
+  }).join('');
+
+  var legendBlock = usedCodes.length ? ('<h4 class="legend-title">Legend</h4><div class="legend-grid">' + legendHtml + '</div>') : '';
+
+  return '<div class="card"><h3 class="card-title">Exterior Condition</h3>' +
+    '<p class="card-subtext">* Move your mouse over colored markers to see defect details.</p>' +
+    '<div class="exterior-diagram-wrap"><img class="car-svg" src="car-outline.svg" alt="Exterior condition diagram with defect markers">' +
+    markersHtml + '</div>' + legendBlock + '</div>';
+}
+
+/* ---------------- main render ---------------- */
+function renderReport(data){
+  var pctByKey = {};
+  (data.ratingBreakdown || []).forEach(function(b){ pctByKey[b.key] = b.pct; });
+
+  var ovGet = function(label){ var f = (data.overview||[]).find(function(o){ return o.label===label; }); return f ? f.value : ''; };
+  var make = ovGet('Make'), model = ovGet('Model'), year = ovGet('Year');
+  var vehicleTitle = (make || model || year) ? (make + ' ' + model + ' ' + year).trim() : (data.vehicle ? data.vehicle.name : 'Vehicle');
+
+  var vehicleImages = data.vehicleImages || [];
+  var cover = vehicleImages[0];
+  var gallery = vehicleImages.slice(1);
+
+  var coverRegIdx = cover ? registerLightbox(cover.title || vehicleTitle, [cover.photo]) : null;
+  var carPhotoHtml = cover
+    ? '<img src="' + cover.photo + '" alt="' + escapeHtml(cover.title||'') + '" onclick="openLightboxByIndex(' + coverRegIdx + ',0)">'
+    : '';
+
+  var overallScore = data.overallScore || '0.0';
+  var overallCondition = data.overallCondition || '—';
+
+  var daysOld = '';
+  if(data.generatedAt){
+    var days = Math.max(0, Math.floor((Date.now() - data.generatedAt) / 86400000));
+    daysOld = '<div class="notice"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L1 21h22L12 2z" stroke="#b8860b" stroke-width="1.6" stroke-linejoin="round" fill="#f6e6b4"/><rect x="11.1" y="9" width="1.8" height="6" fill="#7a5b12"/><rect x="11.1" y="16.4" width="1.8" height="1.8" fill="#7a5b12"/></svg>' +
+      '<div>This report is <b>' + days + ' day' + (days===1?'':'s') + ' old</b>. For the newest report, <a href="#">get it re-inspected.</a></div></div>';
+  }
+
+  var ratingRingsHtml = (data.ratingBreakdown || []).map(function(b){
+    var col = ratingColor(b.pct);
+    var pct = b.pct===null || b.pct===undefined ? 0 : b.pct;
+    var pctText = b.pct===null || b.pct===undefined ? '—' : b.pct + '%';
+    var dash = (pct/100*251.33).toFixed(2) + ' 251.33';
+    return '<div class="rating-item"><div class="ring-wrap"><svg viewBox="0 0 100 100">' +
+      '<circle cx="50" cy="50" r="40" fill="none" stroke="' + col.bg + '" stroke-width="8"/>' +
+      '<circle cx="50" cy="50" r="40" fill="none" stroke="' + col.stroke + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + dash + '" transform="rotate(-90 50 50)"/>' +
+      '</svg><div class="ring-percent">' + pctText + '</div></div><div class="rating-name">' + escapeHtml(b.title) + '</div></div>';
+  }).join('');
+
+  var commentsHtml = data.inspectorComments ? (
+    '<div class="notice comments">' + WARN_ICON + '<div><b>Inspector\'s Comments:</b> ' + escapeHtml(data.inspectorComments) + '</div></div>'
+  ) : '';
+
+  var galleryHtml = '';
+  if(gallery.length){
+    galleryHtml = '<div class="exterior-card"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')"><h3>Vehicle Pictures</h3>' + CHEVRON_ICON + '</div><div class="gallery-grid">' +
+      gallery.map(function(g){
+        var regIdx = registerLightbox(g.title || 'Vehicle Photo', [g.photo]);
+        return '<div class="gallery-item"><figure><img src="' + g.photo + '" onclick="openLightboxByIndex(' + regIdx + ',0)"><figcaption>' + escapeHtml(g.title || '') + '</figcaption></figure></div>';
+      }).join('') + '</div></div>';
+  }
+
+  var html = ''
+    + '<header class="topbar"><div class="logo"><img src="karbaba-logo.png" alt="KarBaba" class="logo-img" onerror="this.style.display=\'none\'"></div>'
+    + '<div><h1>Car Inspection Report</h1><div class="header-meta">' + escapeHtml(data.reportId||'') + '</div></div></header>'
+    + '<h2 class="vehicle-title">' + escapeHtml(vehicleTitle) + '</h2>'
+    + '<div class="main-grid">'
+    +   '<div class="car-photo">' + carPhotoHtml + '</div>'
+    +   '<div class="rating-card"><div><div class="rating-top"><h2>Overall Rating</h2></div>'
+    +     '<div class="gauge-wrap"><svg width="400" height="230" viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg">'
+    +       '<path d="M40 210 A160 160 0 0 1 360 210" fill="none" stroke="#e4e6e8" stroke-width="18" stroke-linecap="round"/>'
+    +       '<path d="M40 210 A160 160 0 0 1 292 75" fill="none" stroke="#1e7a5f" stroke-width="18" stroke-linecap="round"/>'
+    +       '<circle cx="292" cy="75" r="14" fill="#ffffff" stroke="#1e7a5f" stroke-width="7"/></svg>'
+    +       '<div class="gauge-score"><span class="num">' + escapeHtml(overallScore) + '</span><span class="den">/10</span><span class="label">' + escapeHtml(overallCondition) + '</span></div>'
+    +     '</div></div>' + daysOld + '</div>'
+    + '</div>'
+    + '<div class="card"><h3 class="card-title">Overall Rating</h3><div class="ratings-grid">' + ratingRingsHtml + '</div></div>'
+    + '<div class="card"><h3 class="card-title">Car Overview</h3><div class="overview-grid">' + renderOverviewGrid(data.overview) + '</div></div>'
+    + renderExteriorDiagram(data)
+    + commentsHtml
+    + renderChecklistCard('Exterior', 'exterior', data.exterior, pctByKey)
+    + renderChecklistCard('Body & Chassis', 'body', data.bodyChassis, pctByKey)
+    + renderChecklistCard('Engine & Transmission', 'engine', data.engine, pctByKey)
+    + renderChecklistCard('Suspension & Steering', 'suspension', data.suspension, pctByKey)
+    + renderChecklistCard('Brake System', 'brakes', data.brakes, pctByKey)
+    + renderTiresCard(data, pctByKey)
+    + renderChecklistCard('Electrical', 'electrical', data.electrical, pctByKey)
+    + renderChecklistCard('Interior', 'interior', data.interior, pctByKey)
+    + renderChecklistCard('AC & Climate', 'ac', data.ac, pctByKey)
+    + renderChecklistCard('Road Test', 'roadtest', data.roadTest, pctByKey)
+    + galleryHtml
+    + '<div class="disclaimer-card"><h3>Disclaimer</h3>'
+    + '<p>This report reflects the condition of the vehicle as observed on the date of inspection. It provides an approximate assessment only and should not be taken as a guarantee of performance or long-term reliability. Parts not visible or inaccessible during inspection were not evaluated.</p>'
+    + '<p>KarBaba relies on the odometer reading displayed at the time of inspection and does not verify its authenticity. The findings are based on professional judgment but remain subjective; KarBaba and its partners cannot be held responsible for any subsequent issues. Liability, if applicable, will not exceed the amount paid for the inspection service.</p>'
+    + '<p>Please note: Minor paintwork of W1 grade is often undetectable to the human eye and may not appear in this report.</p>'
+    + '<p>For any questions regarding your inspection, please contact our support team at <a href="mailto:ops@karbaba.ai">ops@karbaba.ai</a></p>'
+    + '</div>';
+
+  document.getElementById('page').innerHTML = html;
+
+  var gaugeSvg = document.querySelector('.gauge-wrap svg');
+  var scoreEl = document.querySelector('.gauge-score .num');
+  if(gaugeSvg && scoreEl){
+    var gaugePaths = gaugeSvg.querySelectorAll('path');
+    var gaugeFillPath = gaugePaths[1];
+    var gaugeLength = 0;
+    try{ gaugeLength = gaugeFillPath ? gaugeFillPath.getTotalLength() : 0; }catch(e){ gaugeFillPath = null; }
+    if(gaugeFillPath){
+      gaugeFillPath.style.strokeDasharray = gaugeLength;
+      gaugeFillPath.style.strokeDashoffset = gaugeLength;
+      var targetScore = parseFloat(scoreEl.textContent) || 0;
+      var currentScore = 0;
+      scoreEl.textContent = '0.0';
+      var gaugeInterval = setInterval(function(){
+        currentScore += (targetScore || 0.1) / 40;
+        if(currentScore >= targetScore){ currentScore = targetScore; clearInterval(gaugeInterval); }
+        scoreEl.textContent = currentScore.toFixed(1);
+        if(targetScore > 0) gaugeFillPath.style.strokeDashoffset = gaugeLength * (1 - currentScore / targetScore);
+        else gaugeFillPath.style.strokeDashoffset = gaugeLength;
+      }, 25);
+    }
+  }
+
+  document.querySelectorAll('.ring-wrap').forEach(function(ringWrap){
+    var circles = ringWrap.querySelectorAll('circle');
+    if(circles.length < 2) return;
+    var fg = circles[1];
+    var percentEl = ringWrap.querySelector('.ring-percent');
+    var dashParts = fg.getAttribute('stroke-dasharray').split(' ');
+    var totalCirc = parseFloat(dashParts[1]);
+    var targetPercent = percentEl && /^\d+%$/.test(percentEl.textContent) ? parseInt(percentEl.textContent, 10) : 0;
+    fg.setAttribute('stroke-dasharray', '0 ' + totalCirc);
+    var startText = percentEl ? percentEl.textContent : '';
+    if(percentEl && /^\d+%$/.test(startText)) percentEl.textContent = '0%';
+    var current = 0;
+    var ringInterval = setInterval(function(){
+      current += 1;
+      if(current >= targetPercent){ current = targetPercent; clearInterval(ringInterval); }
+      var dashLen = (current / 100) * totalCirc;
+      fg.setAttribute('stroke-dasharray', dashLen.toFixed(2) + ' ' + totalCirc);
+      if(percentEl && /^\d+%$/.test(startText)) percentEl.textContent = current + '%';
+    }, 18);
+  });
+}
+
+/* ---------------- demo fallback data ---------------- */
+var DEMO_DATA = {
+  reportId: 'KB-DEMO',
+  generatedAt: Date.now() - 46*86400000,
+  overallScore: '6.1', overallCondition: 'Good',
+  ratingBreakdown: [
+    {key:'exterior', title:'Exterior', pct:20}, {key:'body', title:'Body & Chassis', pct:35},
+    {key:'engine', title:'Engine & Transmission', pct:60}, {key:'suspension', title:'Suspension & Steering', pct:60},
+    {key:'brakes', title:'Brake System', pct:100}, {key:'tires', title:'Tires', pct:60},
+    {key:'electrical', title:'Electrical', pct:100}, {key:'interior', title:'Interior', pct:35},
+    {key:'ac', title:'AC & Climate', pct:100}, {key:'roadtest', title:'Road Test', pct:20}
+  ],
+  overview: [
+    {label:'Customer Name', value:'John Doe'}, {label:'Make', value:'Toyota'}, {label:'Model', value:'Corolla'}, {label:'Year', value:'2018'},
+    {label:'Engine Capacity', value:'1600 cc'}, {label:'Registered City', value:'Lahore'}, {label:'Inspection Date', value:'11-Sep-2025'},
+    {label:'Registration Number', value:'ABC-1234'}, {label:'Chassis Number', value:'ZRE2171R-6027620'}, {label:'Mileage', value:'53442 km'},
+    {label:'Color', value:'White'}, {label:'Fuel Type', value:'Petrol'}, {label:'Transmission', value:'Automatic'}, {label:'Assembly', value:'Local'},
+    {label:'Inspection Location', value:'DHA Phase 5, Lahore'}
+  ],
+  vehicleImages: [{title:'Front View', photo: PLACEHOLDER_IMG}, {title:'Side View', photo: PLACEHOLDER_IMG}, {title:'Interior', photo: PLACEHOLDER_IMG}],
+  exteriorTags: [
+    {id:'d1', x:76, y:12, code:'A1', photo:'', remark:'Small scratch near roof edge.'},
+    {id:'d2', x:20, y:42, code:'U3', photo:'', remark:'Big dent on left door.'},
+    {id:'d3', x:78, y:68, code:'S1', photo:'', remark:'Surface rust near wheel arch.'},
+    {id:'d4', x:34, y:86, code:'P', photo:'', remark:''}
+  ],
+  inspectorComments: 'The underside of the vehicle is covered with plastic shields, making some inspection points inaccessible. The vehicle\'s lower body is noticeably dirty, and there is visible impact on the right-side strut tower apron. Complete tyre information could not be obtained.',
+  exterior: [
+    {item:'Front Bumper', status:'Repaired', cls:'bad', remarks:'Lorem Ipsum is simply dummy text of the printing and typesetting industry, used here as a placeholder remark to demonstrate the truncate/expand behaviour.'},
+    {item:'Rear Bumper', status:'Good', cls:'ok'}, {item:'Bonnet', status:'Good', cls:'ok', remarks:'Minor swirl marks, within tolerance.'}, {item:'Roof', status:'Good', cls:'ok'},
+    {item:'Trunk', status:'Good', cls:'ok'}, {item:'Front Fender', status:'Good', cls:'ok'},
+    {item:'Rear Fender', status:'Good', cls:'ok'}, {item:'Front Right Door', status:'Good', cls:'ok'},
+    {item:'Front Left Door', status:'Dent', cls:'bad', remarks:'Small dent, no paint damage.'}, {item:'Back Right Door', status:'Good', cls:'ok'},
+    {item:'Back Left Door', status:'Good', cls:'ok'}, {item:'Side Mirror', status:'Present', cls:'ok'},
+    {item:'Windshield', status:'Crack', cls:'bad'}, {item:'Rear Glass', status:'Present', cls:'ok'},
+    {item:'Headlights', status:'Working', cls:'ok', remarks:'Slight condensation, clears after a few minutes.'}, {item:'Tail Lights', status:'Working', cls:'ok'},
+    {item:'Fog Lamps', status:'Working', cls:'ok'}, {item:'Indicators', status:'Working', cls:'ok'},
+    {item:'Wipers', status:'Working', cls:'ok'}, {item:'Number Plates', status:'Good', cls:'ok'}
+  ],
+  bodyChassis: [
+    {item:'Radiator Core Support', status:'No Damage', cls:'ok'}, {item:'Front Left Rails', status:'No Damage', cls:'ok'},
+    {item:'Front Right Rails', status:'No Damage', cls:'ok'}, {item:'Left Apron', status:'No Damage', cls:'ok'},
+    {item:'Right Apron', status:'Damage', cls:'bad', remarks:'Visible impact mark, panel realigned.'}, {item:'A Left Pillar', status:'No Damage', cls:'ok'},
+    {item:'B Left Pillar', status:'No Damage', cls:'ok'}, {item:'C Left Pillar', status:'No Damage', cls:'ok'},
+    {item:'A Right Pillar', status:'No Damage', cls:'ok'}, {item:'B Right Pillar', status:'No Damage', cls:'ok'},
+    {item:'C Right Pillar', status:'No Damage', cls:'ok'}, {item:'Roof', status:'No Damage', cls:'ok'},
+    {item:'Cross Members', status:'No Damage', cls:'ok'}, {item:'Trunk Floor', status:'Damage', cls:'bad', remarks:'Minor surface dent.'},
+    {item:'Accident/Structural Damage', status:'Dent', cls:'bad', remarks:'Localized repair on right apron, no chassis misalignment detected.'}
+  ],
+  engine: [
+    {item:'Engine Oil Level', status:'Full', cls:'ok'}, {item:'Oil Condition', status:'Full', cls:'ok'},
+    {item:'Oil Leakage', status:'No Leakage', cls:'ok'}, {item:'Coolant', status:'Full', cls:'ok'},
+    {item:'Coolant Leakage', status:'Leakage', cls:'bad', remarks:'Minor weep at the lower radiator hose clamp.'}, {item:'Radiator', status:'Ok', cls:'ok'},
+    {item:'Cooling Fan', status:'Working', cls:'ok'}, {item:'Battery', status:'Good', cls:'ok'},
+    {item:'Alternator/Generator', status:'Charging', cls:'ok'}, {item:'Belts', status:'Good', cls:'ok'},
+    {item:'Air Filter', status:'Full', cls:'ok'}, {item:'Engine Mount', status:'Ok', cls:'ok', remarks:'Slight vibration at idle, within normal range.'},
+    {item:'Engine Noise', status:'No Noise', cls:'ok'}, {item:'Engine Vibration', status:'No Vibration', cls:'ok'},
+    {item:'Smoke', status:'No Smoke', cls:'ok'}, {item:'Engine Start', status:'Smooth', cls:'ok', remarks:'Starts on first crank, warm or cold.'},
+    {item:'Check Engine Light', status:'Off', cls:'ok'},
+    {item:'Gearbox', status:'Smooth', cls:'ok'}, {item:'Gear Shift', status:'Working', cls:'ok'},
+    {item:'Transmission Oil', status:'Full', cls:'ok'}, {item:'Transmission Leakage', status:'Minor Leakage', cls:'warn', remarks:'Trace seepage at output seal, monitor at next service.'},
+    {item:'Clutch', status:'Smooth', cls:'ok'}, {item:'Drive Shaft', status:'Good', cls:'ok'},
+    {item:'CV Joint Left', status:'Ok', cls:'ok', remarks:'Boot intact, no grease leakage.'}, {item:'CV Joint Right', status:'Ok', cls:'ok'}
+  ],
+  suspension: [
+    {item:'Steering Wheel Play', status:'No Play', cls:'ok'}, {item:'Left Ball Joint', status:'Good', cls:'ok'},
+    {item:'Right Ball Joint', status:'Good', cls:'ok'}, {item:'Left Z Links', status:'Good', cls:'ok'},
+    {item:'Right Z Links', status:'Good', cls:'ok'}, {item:'Left Tie Rod End', status:'Not Found', cls:'bad', remarks:'Could not be inspected — underbody shield blocked access.'},
+    {item:'Right Tie Rod End', status:'Good', cls:'ok'}, {item:'Front Left Boots', status:'Intact', cls:'ok'},
+    {item:'Front Right Boots', status:'Intact', cls:'ok'}, {item:'Front Left Bushes', status:'Good', cls:'ok'},
+    {item:'Front Right Bushes', status:'Good', cls:'ok'}, {item:'Front Left Shock', status:'Working', cls:'ok'},
+    {item:'Front Right Shock', status:'Working', cls:'ok', remarks:'Minor oil film on shock body, no active leak.'},
+    {item:'Rear Right Bushes', status:'Good', cls:'ok'}, {item:'Rear Left Bushes', status:'Good', cls:'ok', remarks:'Slight wear, no play detected.'},
+    {item:'Rear Right Shock', status:'Working', cls:'ok'}, {item:'Rear Left Shock', status:'Working', cls:'ok'},
+    {item:'Steering Rack', status:'Good', cls:'ok'}, {item:'Steering Pump', status:'Working', cls:'ok', remarks:'Slight whine on full lock, fluid level normal.'},
+    {item:'Wheel Bearings', status:'No Noise', cls:'ok', remarks:'No play, no noise on rotation.'}
+  ],
+  brakes: [
+    {item:'Front Right Disc', status:'Smooth', cls:'ok'}, {item:'Front Left Disc', status:'Smooth', cls:'ok', remarks:'Light surface rust, normal for storage duration.'},
+    {item:'Front Right Brake Pad', status:'More than 50%', cls:'ok'}, {item:'Front Left Brake Pad', status:'More than 50%', cls:'ok'},
+    {item:'Brake Fluid', status:'Normal', cls:'ok', remarks:'Clear, at recommended level.'}, {item:'Hand Brake', status:'Working', cls:'ok'},
+    {item:'Brake Pipes', status:'No Leakage', cls:'ok'}
+  ],
+  tires: [
+    {pos:'Front Left', brand:'Dunlop', size:'205/65 R16', life:'80%', cls:'ok'}, {pos:'Front Right', brand:'Dunlop', size:'205/65 R16', life:'70%', cls:'ok'},
+    {pos:'Rear Left', brand:'Dunlop', size:'205/65 R16', life:'50%', cls:'warn'}, {pos:'Rear Right', brand:'Dunlop', size:'205/65 R16', life:'80%', cls:'ok'},
+    {pos:'Spare', brand:'Dunlop', size:'205/65 R16', life:'80%', cls:'ok'}
+  ],
+  rims:'Alloy', rimsCls:'ok', wheelCaps:'Present', wheelCapsCls:'ok', wheelCapsRemarks:'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+  electrical: [
+    {item:'Battery', status:'Not Working', cls:'bad', remarks:'Terminal corrosion, load test failed.'}, {item:'Horn', status:'Working', cls:'ok'},
+    {item:'Headlights', status:'Good', cls:'ok'}, {item:'High Beam', status:'No Damage', cls:'ok'},
+    {item:'Indicators', status:'Working', cls:'ok'}, {item:'Tail Lights', status:'Working', cls:'ok'},
+    {item:'Brake Lights', status:'Not Working', cls:'bad', remarks:'Left side bulb blown.'}, {item:'Reverse Lights', status:'Not Working', cls:'bad', remarks:'Fuse blown, replaced during inspection.'},
+    {item:'Cabin Lights', status:'Not Working', cls:'bad', remarks:'Switch unresponsive.'}, {item:'Dashboard Lights', status:'Factory', cls:'ok'},
+    {item:'Power Windows', status:'Working', cls:'ok'}, {item:'Central Locking', status:'Working', cls:'ok'}
+  ],
+  interior: [
+    {item:'Dashboard', status:'Normal', cls:'bad', remarks:'Minor cracking near vents, cosmetic only.'}, {item:'Steering Wheel', status:'Good', cls:'ok'},
+    {item:'Seats', status:'Good', cls:'ok'}, {item:'Right Front Seat Electric Function', status:'Not Working', cls:'bad', remarks:'Recline motor unresponsive.'},
+    {item:'Left Front Seat Electric Function', status:'Working', cls:'ok', remarks:'Fully functional, no noise.'}, {item:'Right Seat Belt', status:'Working', cls:'ok'},
+    {item:'Left Seat Belt', status:'Working', cls:'ok'}, {item:'Rear Seat Belts', status:'Working', cls:'ok'},
+    {item:'Roof Lining', status:'Full', cls:'ok'}, {item:'Seat Cover', status:'Good', cls:'ok', remarks:'Light wear on driver bolster.'},
+    {item:'Infotainment', status:'Working', cls:'ok'}, {item:'Speakers', status:'Not Working', cls:'bad'},
+    {item:'Reverse Camera', status:'Not Working', cls:'bad', remarks:'Feed is present but image is distorted.'}, {item:'Parking Sensors', status:'Working', cls:'ok'}
+  ],
+  ac: [
+    {item:'AC Fitted', status:'Yes', cls:'ok', remarks:'Factory-fitted, single zone.'}, {item:'AC Cooling', status:'Good', cls:'ok'},
+    {item:'Heater', status:'Working', cls:'ok'}, {item:'Blower', status:'Not Working', cls:'bad'},
+    {item:'Rear AC', status:'Smooth', cls:'ok'}
+  ],
+  roadTest: [
+    {item:'Acceleration', status:'Smooth', cls:'ok', remarks:'No hesitation across the rev range.'}, {item:'Engine Performance', status:'Good', cls:'ok'},
+    {item:'Gear Shift', status:'Responsive', cls:'ok'}, {item:'Steering', status:'Average', cls:'ok'},
+    {item:'Braking', status:'Responsive', cls:'ok'}, {item:'Suspension Comfort', status:'Average', cls:'ok'},
+    {item:'Cabin Noise', status:'Low', cls:'ok'}, {item:'Vibration', status:'Minor', cls:'warn', remarks:'Slight vibration felt above 100 km/h, likely wheel balance.'}
+  ]
+};
+
+/* ---------------- boot ---------------- */
+(function boot(){
+  var params = new URLSearchParams(location.search);
+  var reqId = params.get('req');
+  var data = null;
+  if(reqId){
+    try{
+      var raw = localStorage.getItem('karbaba_report_' + reqId);
+      if(raw) data = JSON.parse(raw);
+    }catch(e){ /* ignore malformed storage */ }
+  }
+  if(!data) data = DEMO_DATA;
+  renderReport(data);
+})();
+</script>
+</body>
+</html>

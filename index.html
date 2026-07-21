@@ -57783,7 +57783,7 @@ class Component extends DCLogic {
 
   onOpenDetail = e => this.setState({detailReqId: e.currentTarget.dataset.reqid});
   onCloseDetail = () => this.setState({detailReqId: null});
-  onViewReport = e => { window.open('only_Inspection.html?req=' + e.currentTarget.dataset.reqid, '_blank'); };
+  onViewReport = e => { window.open('inspection_report.html?req=' + e.currentTarget.dataset.reqid, '_blank'); };
 
   onStartInspection = () => {
     if(!this.schema) return;
@@ -58378,6 +58378,7 @@ class Component extends DCLogic {
       {label:'Color', value:ov.color||'—'},
       {label:'Transmission', value:ov.transmissionType},
       {label:'Chassis Number', value:ov.chassisNo||'—'},
+      {label:'Assembly', value:req.car.assembly},
       {label:'Inspection Date', value:req.slot.date},
       {label:'Inspection Location', value:`${req.slot.area}, ${req.contact.city}`},
     ];
@@ -58432,7 +58433,9 @@ class Component extends DCLogic {
       electrical, interior, ac, roadTest,
       gauges, overallScore: overallScoreStr, overallCondition: condLabel, ratingBreakdown: breakdown,
       inspectorComments: this.state.inspectorComments||undefined,
+      exteriorTags: (this.state.exteriorTags||[]).map(t=>({id:t.id, x:t.x, y:t.y, code:t.code, photo:t.photo||'', remark:t.remark||''})),
       reportId,
+      generatedAt: Date.now(),
     };
   }
 
