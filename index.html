@@ -57055,6 +57055,19 @@ function buildSeedAnswers(){
         <sc-if value="{{ r.hasTypeBadge }}" hint-placeholder-val="{{ false }}">
           <div style="margin-top:10px;"><span style="background:{{ r.typeColorBg }};color:{{ r.typeColorFg }};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">{{ r.typeLabel }}</span></div>
         </sc-if>
+        <sc-if value="{{ r.hasProgress }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:12px;">
+            <div style="display:flex;gap:3px;margin-bottom:6px;">
+              <sc-for list="{{ r.progressSegments }}" as="seg" hint-placeholder-count="15">
+                <div style="flex:1;height:6px;border-radius:3px;background:{{ seg.color }};transition:background .3s ease;"></div>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11.5px;color:var(--color-text-secondary);font-weight:600;">{{ r.progressStepsLabel }}</span>
+              <span style="font-size:11.5px;color:#D97757;font-weight:800;">{{ r.progressPctLabel }}</span>
+            </div>
+          </div>
+        </sc-if>
         <sc-if value="{{ r.hasScore }}" hint-placeholder-val="{{ false }}">
           <div style="margin-top:10px;"><span style="background:var(--color-success-bg);color:var(--color-success);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">{{ r.score }}</span></div>
         </sc-if>
@@ -57597,14 +57610,14 @@ function buildSeedAnswers(){
       </sc-if>
       <sc-if value="{{ confirm.isExit }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;justify-content:center;margin-bottom:10px;">
-          <x-import component-from-global-scope="KarBabaDesignSystem_d7b6b4.Icon" name="IconHeroiconsMiniHttpsHeroiconsTypeExclamationTriangle" size="38" style="color:var(--color-danger);" hint-size="38px,38px"></x-import>
+          <x-import component-from-global-scope="KarBabaDesignSystem_d7b6b4.Icon" name="IconHeroiconsMiniHttpsHeroiconsTypeExclamationTriangle" size="38" style="color:var(--color-warning);" hint-size="38px,38px"></x-import>
         </div>
         <h3 style="margin:0 0 8px;font-size:17px;">Exit This Inspection?</h3>
         <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0 0 6px;line-height:1.6;">{{ confirm.exitStepMsg }}</p>
-        <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 20px;line-height:1.6;">All progress you have filled in so far will be <b>discarded</b> and cannot be recovered. This action cannot be undone.</p>
+        <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 20px;line-height:1.6;">Your progress will be <b>saved</b>. When you come back, you can resume from this step.</p>
         <div style="display:flex;gap:10px;justify-content:center;">
           <button sc-camel-on-click="{{ onCancelConfirm }}" style="flex:1;background:#fff;border:1px solid var(--color-border-default);color:var(--color-text-primary);padding:12px;border-radius:var(--radius-mlg);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>
-          <button sc-camel-on-click="{{ onConfirmExitWizard }}" style="flex:1;background:var(--color-danger);border:none;color:#fff;padding:12px;border-radius:var(--radius-mlg);font-size:13px;font-weight:700;cursor:pointer;">Yes, Exit</button>
+          <button sc-camel-on-click="{{ onConfirmExitWizard }}" style="flex:1;background:var(--color-brand);border:none;color:#fff;padding:12px;border-radius:var(--radius-mlg);font-size:13px;font-weight:700;cursor:pointer;">Yes, Exit</button>
         </div>
       </sc-if>
     </div>
@@ -57711,6 +57724,7 @@ class Component extends DCLogic {
     currentStep: 0,
     visitedSteps: {},
     wizardNavSheetOpen: false,
+    savedProgress: {},
 
     answers: {},
     remarks: {},
@@ -57790,6 +57804,31 @@ class Component extends DCLogic {
     const reqId = this.state.detailReqId;
     const req = this.state.assignedData.find(r => r.id === reqId);
     if(!req) return;
+    const saved = this.state.savedProgress[reqId];
+    if(saved){
+      // Resume a previously exited inspection from exactly where it was left off.
+      this.setState({
+        detailReqId: null,
+        wizardOpen: true,
+        activeReqId: reqId,
+        activeReqSnapshot: JSON.parse(JSON.stringify(req)),
+        currentStep: saved.currentStep,
+        visitedSteps: saved.visitedSteps,
+        wizardNavSheetOpen: false,
+        answers: saved.answers,
+        remarks: saved.remarks,
+        photos: saved.photos,
+        overview: saved.overview,
+        gridErrors: saved.gridErrors,
+        tireErrors: saved.tireErrors,
+        overviewErrors: saved.overviewErrors,
+        rims: saved.rims, rimsRemark: saved.rimsRemark, wheelCaps: saved.wheelCaps, wheelCapsRemark: saved.wheelCapsRemark,
+        images: saved.images, imagePhotos: saved.imagePhotos, imgCounter: saved.imgCounter,
+        inspectorComments: saved.inspectorComments,
+        wizStartTime: saved.wizStartTime || Date.now(),
+      });
+      return;
+    }
     const tires = freshTires();
     this.setState({
       detailReqId: null,
@@ -58026,26 +58065,48 @@ class Component extends DCLogic {
     this.setState({confirmModal:'exit'});
   };
   onConfirmExitWizard = () => {
-    this.setState({
-      confirmModal: null,
-      wizardOpen: false,
-      activeReqId: null,
-      activeReqSnapshot: null,
-      currentStep: 0,
-      visitedSteps: {},
-      wizardNavSheetOpen: false,
-      answers: {},
-      remarks: {},
-      photos: {},
-      overview: freshOverview(),
-      gridErrors: {},
-      tireErrors: {},
-      overviewErrors: {},
-      rims: '', rimsRemark: '', wheelCaps: '', wheelCapsRemark: '',
-      images: [], imagePhotos: {}, imgCounter: 0,
-      inspectorComments: '',
+    this.setState(s => {
+      const reqId = s.activeReqId;
+      const savedProgress = {...s.savedProgress};
+      if(reqId){
+        savedProgress[reqId] = {
+          currentStep: s.currentStep,
+          visitedSteps: s.visitedSteps,
+          answers: s.answers,
+          remarks: s.remarks,
+          photos: s.photos,
+          overview: s.overview,
+          gridErrors: s.gridErrors,
+          tireErrors: s.tireErrors,
+          overviewErrors: s.overviewErrors,
+          rims: s.rims, rimsRemark: s.rimsRemark, wheelCaps: s.wheelCaps, wheelCapsRemark: s.wheelCapsRemark,
+          images: s.images, imagePhotos: s.imagePhotos, imgCounter: s.imgCounter,
+          inspectorComments: s.inspectorComments,
+          wizStartTime: s.wizStartTime,
+        };
+      }
+      return {
+        confirmModal: null,
+        wizardOpen: false,
+        activeReqId: null,
+        activeReqSnapshot: null,
+        currentStep: 0,
+        visitedSteps: {},
+        wizardNavSheetOpen: false,
+        answers: {},
+        remarks: {},
+        photos: {},
+        overview: freshOverview(),
+        gridErrors: {},
+        tireErrors: {},
+        overviewErrors: {},
+        rims: '', rimsRemark: '', wheelCaps: '', wheelCapsRemark: '',
+        images: [], imagePhotos: {}, imgCounter: 0,
+        inspectorComments: '',
+        savedProgress,
+      };
     });
-    this.showToast('Inspection exited — all progress was discarded.');
+    this.showToast('Inspection exited — your progress has been saved.');
   };
   onToggleJumpSheet = () => this.setState(s => ({wizardNavSheetOpen: !s.wizardNavSheetOpen}));
 
@@ -58498,18 +58559,31 @@ class Component extends DCLogic {
 
     let rows = [];
     if(s.activeTab==='assigned'){
-      rows = s.assignedData.map((r,idx)=>({
-        id:r.id, name:r.contact.name, phone:r.contact.phone,
-        carLine:`${r.car.make} ${r.car.model}`, carSub:`${r.car.variant} · ${r.car.year}`,
-        city:r.contact.city, hasDate:true, dateLine:`${r.slot.date}, ${r.slot.startTime}`,
-        statusLabel: idx===1 ? 'In Progress' : 'Assigned',
-        statusBg: idx===1 ? '#fff3e0' : 'var(--color-info-bg)',
-        statusFg: idx===1 ? '#c2660d' : 'var(--color-info)',
-        hasTypeBadge:true, typeLabel: r.inspectionType==='sell' ? 'Sell By KarBaba':'Only Inspection',
-        typeColorBg: r.inspectionType==='sell' ? 'var(--color-success-bg)' : 'var(--color-info-bg)',
-        typeColorFg: r.inspectionType==='sell' ? 'var(--color-success)' : 'var(--color-info)',
-        hasScore:false, showViewReport:false,
-      }));
+      const totalSteps = schema ? schema.FORM_SCHEMA.length : 0;
+      rows = s.assignedData.map((r)=>{
+        const saved = s.savedProgress[r.id];
+        const completedSteps = saved ? Object.keys(saved.visitedSteps || {}).length : 0;
+        const progressPct = (saved && totalSteps) ? Math.round((completedSteps / totalSteps) * 100) : 0;
+        return {
+          id:r.id, name:r.contact.name, phone:r.contact.phone,
+          carLine:`${r.car.make} ${r.car.model}`, carSub:`${r.car.variant} · ${r.car.year}`,
+          city:r.contact.city, hasDate:true, dateLine:`${r.slot.date}, ${r.slot.startTime}`,
+          statusLabel: saved ? 'In Progress' : 'Assigned',
+          statusBg: saved ? '#FAECE7' : 'var(--color-info-bg)',
+          statusFg: saved ? '#D97757' : 'var(--color-info)',
+          hasTypeBadge:true, typeLabel: r.inspectionType==='sell' ? 'Sell By KarBaba':'Only Inspection',
+          typeColorBg: r.inspectionType==='sell' ? 'var(--color-success-bg)' : 'var(--color-info-bg)',
+          typeColorFg: r.inspectionType==='sell' ? 'var(--color-success)' : 'var(--color-info)',
+          hasScore:false, showViewReport:false,
+          hasProgress: !!saved,
+          progressPct,
+          progressStepsLabel: `${completedSteps} / ${totalSteps} Steps Completed`,
+          progressPctLabel: `${progressPct}% Complete`,
+          progressSegments: Array.from({length: totalSteps}, (_, i) => ({
+            color: i < completedSteps ? '#D97757' : 'var(--kb-grey-100)'
+          })),
+        };
+      });
     } else if(s.activeTab==='pending'){
       rows = s.pendingData.map(r=>({
         id:r.id, name:r.contact.name, phone:r.contact.phone,
