@@ -256,50 +256,134 @@
     color: var(--ink);
   }
 
-  /* Rating rings */
-  .ratings-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 28px 16px;
-  }
-
-  .rating-item {
-    flex: 1 1 100px;
-    min-width: 90px;
+  /* ===== Overall Rating (per-category breakdown) =====
+     Mobile-first: .rating-cols stacks into one column (identical to the old
+     single-list layout). From 900px up it becomes a 2-column grid — first
+     half of the categories on the left, second half on the right. */
+  .rating-cols {
     display: flex;
     flex-direction: column;
+    gap: 20px;
+  }
+
+  .rating-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  @media (min-width: 900px) {
+    .rating-cols {
+      flex-direction: row;
+      gap: 36px;
+    }
+    .rating-col {
+      flex: 1 1 50%;
+      min-width: 0;
+    }
+  }
+
+  .rating-row {
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rating-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .rating-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .rating-row-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+  }
+
+  .rating-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .rating-row-name {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .rating-row-cond {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .rating-row-right {
+    display: flex;
     align-items: center;
-    text-align: center;
-    gap: 12px;
+    gap: 16px;
   }
 
-  .ring-wrap {
-    position: relative;
-    width: 92px;
-    height: 92px;
+  .rating-row-pct {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--ink);
+    white-space: nowrap;
   }
 
-  .ring-wrap svg {
-    width: 100%;
+  .rating-view-link {
+    font-size: 0.82rem;
+    color: var(--link);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .rating-view-link:hover {
+    text-decoration: underline;
+  }
+
+  .rating-track {
+    height: 8px;
+    background: #e9ebee;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .rating-track-fill {
     height: 100%;
+    border-radius: 6px;
+    width: 0%;
+    transition: width 0.9s ease;
     display: block;
   }
 
-  .ring-percent {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2b2f33;
+  .rating-counts {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #6c7580;
   }
 
-  .rating-name {
-    font-size: 0.92rem;
-    color: #4b5157;
-    line-height: 1.3;
+  @media (max-width: 640px) {
+    .rating-row-top {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .rating-row-right {
+      width: 100%;
+      justify-content: space-between;
+    }
   }
 
   /* Car overview grid */
@@ -358,9 +442,8 @@
     .overview-grid { grid-template-columns: 1fr; }
     .card { padding: 22px 20px 24px; }
     .card-title { font-size: 1.15rem; margin-bottom: 20px; }
-    .ring-wrap { width: 76px; height: 76px; }
-    .ring-percent { font-size: 0.85rem; }
-    .rating-item { min-width: 76px; }
+    .rating-row-name { font-size: 0.96rem; }
+    .rating-row-pct { font-size: 1.15rem; }
   }
   /* ===== Exterior Condition diagram ===== */
   .card-subtext {
@@ -1170,6 +1253,93 @@ function ratingColor(pct){
 }
 function statusCls(cls){ return cls==='ok' ? 'good' : (cls==='warn' ? 'warn' : 'bad'); }
 
+/* ---------------- Overall Rating section (per-category breakdown, logic-driven) ----------------
+   Recomputes pct + pass/warn/issue counts directly from each category's own checklist items
+   (same OK-vs-not-OK rule the wizard uses) instead of just trusting the stored pct number, so the
+   bars/labels/counts shown here can never drift out of sync with the actual inspection data. */
+function conditionLabel(pct){
+  if(pct===null || pct===undefined) return '—';
+  if(pct>=90) return 'Excellent';
+  if(pct>=70) return 'Good';
+  if(pct>=50) return 'Average';
+  if(pct>=30) return 'Needs Attention';
+  return 'Critical';
+}
+var RATING_CATS = [
+  {key:'exterior', title:'Exterior', get:function(d){ return d.exterior; }},
+  {key:'body', title:'Body & Chassis', get:function(d){ return d.bodyChassis; }},
+  {key:'engine', title:'Engine & Transmission', get:function(d){ return d.engine; }},
+  {key:'suspension', title:'Suspension & Steering', get:function(d){ return d.suspension; }},
+  {key:'brakes', title:'Brake System', get:function(d){ return d.brakes; }},
+  {key:'tires', title:'Tires', get:function(d){
+    var arr = (d.tires || []).slice();
+    arr.push({cls:d.rimsCls}); arr.push({cls:d.wheelCapsCls});
+    return arr;
+  }},
+  {key:'electrical', title:'Electrical', get:function(d){ return d.electrical; }},
+  {key:'interior', title:'Interior', get:function(d){ return d.interior; }},
+  {key:'ac', title:'AC & Climate', get:function(d){ return d.ac; }},
+  {key:'roadtest', title:'Road Test', get:function(d){ return d.roadTest; }}
+];
+function computeCategoryCounts(items){
+  var passed=0, warn=0, bad=0;
+  (items||[]).forEach(function(it){
+    if(it.cls==='ok') passed++;
+    else if(it.cls==='warn') warn++;
+    else bad++;
+  });
+  return {passed:passed, warn:warn, bad:bad, total:passed+warn+bad};
+}
+function goToSection(key){
+  var el = document.getElementById('section-' + key);
+  if(!el) return;
+  el.classList.remove('collapsed');
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function renderRatingRow(s){
+  var pctText = s.pct===null ? '—' : s.pct + '%';
+  var countsText;
+  if(!s.total) countsText = 'No items recorded';
+  else if(s.warn===0 && s.bad===0) countsText = 'All ' + s.total + ' checks passed';
+  else countsText = s.passed + ' passed · ' + s.warn + ' warning' + (s.warn===1?'':'s') + ' · ' + s.bad + ' issue' + (s.bad===1?'':'s');
+  return '<div class="rating-row">' +
+    '<div class="rating-row-top">' +
+      '<div class="rating-row-left"><span class="rating-dot" style="background:' + s.stroke + ';"></span>' +
+        '<div><div class="rating-row-name">' + escapeHtml(s.title) + '</div>' +
+        '<div class="rating-row-cond" style="color:' + s.stroke + ';">' + escapeHtml(s.label) + '</div></div>' +
+      '</div>' +
+      '<div class="rating-row-right"><div class="rating-row-pct">' + pctText + '</div>' +
+      '<span class="rating-view-link" onclick="goToSection(\'' + s.key + '\')">View Inspection &#8594;</span></div>' +
+    '</div>' +
+    '<div class="rating-track"><div class="rating-track-fill" data-target="' + (s.pct||0) + '" style="background:' + s.stroke + ';"></div></div>' +
+    '<div class="rating-counts">' + countsText + '</div>' +
+  '</div>';
+}
+function renderOverallRatingSection(data){
+  var stats = RATING_CATS.map(function(c){
+    var counts = computeCategoryCounts(c.get(data));
+    var pct = counts.total ? Math.round(counts.passed / counts.total * 100) : null;
+    var col = ratingColor(pct);
+    return {key:c.key, title:c.title, pct:pct, label:conditionLabel(pct),
+      passed:counts.passed, warn:counts.warn, bad:counts.bad, total:counts.total,
+      stroke:col.stroke};
+  });
+
+  // Desktop shows this as a 2-column grid (first half left, second half right);
+  // on mobile the two column blocks simply stack, reproducing the original
+  // single continuous list in the same top-to-bottom order.
+  var mid = Math.ceil(stats.length / 2);
+  var colLeftHtml = stats.slice(0, mid).map(renderRatingRow).join('');
+  var colRightHtml = stats.slice(mid).map(renderRatingRow).join('');
+
+  return '<div class="card rating-section"><h3 class="card-title">Overall Rating</h3>' +
+    '<div class="rating-cols">' +
+      '<div class="rating-col">' + colLeftHtml + '</div>' +
+      '<div class="rating-col">' + colRightHtml + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
 /* ---------------- remarks (real truncate + expand, hidden entirely if empty) ---------------- */
 var LB_REGISTRY = [];
 function renderRemarks(text){
@@ -1264,7 +1434,7 @@ function twoColRows(items){
 }
 function renderChecklistCard(title, key, items, pctByKey){
   if(!items || !items.length){
-    return '<div class="exterior-card"><div class="exterior-header"><h3>' + escapeHtml(title) + '</h3></div><div class="empty-state" style="padding:16px 28px;">No data recorded.</div></div>';
+    return '<div class="exterior-card" id="section-' + key + '"><div class="exterior-header"><h3>' + escapeHtml(title) + '</h3></div><div class="empty-state" style="padding:16px 28px;">No data recorded.</div></div>';
   }
   var pct = pctByKey[key];
   var pctText = (pct===null || pct===undefined) ? '—' : pct + '%';
@@ -1280,7 +1450,7 @@ function renderChecklistCard(title, key, items, pctByKey){
   } else {
     body = twoColRows(items);
   }
-  return '<div class="exterior-card"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">' +
+  return '<div class="exterior-card" id="section-' + key + '"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">' +
     '<h3>' + escapeHtml(title) + '</h3><div class="pct-wrap">' + pctText + ' ' + CHEVRON_ICON + '</div></div>' + body + '</div>';
 }
 function renderTiresCard(data, pctByKey){
@@ -1305,7 +1475,7 @@ function renderTiresCard(data, pctByKey){
   rows += renderRemarks(data.wheelCapsRemarks);
   var pct = pctByKey['tires'];
   var pctText = (pct===null || pct===undefined) ? '—' : pct + '%';
-  return '<div class="exterior-card"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">' +
+  return '<div class="exterior-card" id="section-tires"><div class="exterior-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">' +
     '<h3>Tires</h3><div class="pct-wrap">' + pctText + ' ' + CHEVRON_ICON + '</div></div>' + rows + '</div>';
 }
 function renderOverviewGrid(overview){
@@ -1381,17 +1551,6 @@ function renderReport(data){
       '<div>This report is <b>' + days + ' day' + (days===1?'':'s') + ' old</b>. For the newest report, <a href="#">get it re-inspected.</a></div></div>';
   }
 
-  var ratingRingsHtml = (data.ratingBreakdown || []).map(function(b){
-    var col = ratingColor(b.pct);
-    var pct = b.pct===null || b.pct===undefined ? 0 : b.pct;
-    var pctText = b.pct===null || b.pct===undefined ? '—' : b.pct + '%';
-    var dash = (pct/100*251.33).toFixed(2) + ' 251.33';
-    return '<div class="rating-item"><div class="ring-wrap"><svg viewBox="0 0 100 100">' +
-      '<circle cx="50" cy="50" r="40" fill="none" stroke="' + col.bg + '" stroke-width="8"/>' +
-      '<circle cx="50" cy="50" r="40" fill="none" stroke="' + col.stroke + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + dash + '" transform="rotate(-90 50 50)"/>' +
-      '</svg><div class="ring-percent">' + pctText + '</div></div><div class="rating-name">' + escapeHtml(b.title) + '</div></div>';
-  }).join('');
-
   var commentsHtml = data.inspectorComments ? (
     '<div class="notice comments">' + WARN_ICON + '<div><b>Inspector\'s Comments:</b> ' + escapeHtml(data.inspectorComments) + '</div></div>'
   ) : '';
@@ -1419,7 +1578,7 @@ function renderReport(data){
     +       '<div class="gauge-score"><span class="num">' + escapeHtml(overallScore) + '</span><span class="den">/10</span><span class="label">' + escapeHtml(overallCondition) + '</span></div>'
     +     '</div></div>' + daysOld + '</div>'
     + '</div>'
-    + '<div class="card"><h3 class="card-title">Overall Rating</h3><div class="ratings-grid">' + ratingRingsHtml + '</div></div>'
+    + renderOverallRatingSection(data)
     + '<div class="card"><h3 class="card-title">Car Overview</h3><div class="overview-grid">' + renderOverviewGrid(data.overview) + '</div></div>'
     + renderExteriorDiagram(data)
     + commentsHtml
@@ -1466,25 +1625,11 @@ function renderReport(data){
     }
   }
 
-  document.querySelectorAll('.ring-wrap').forEach(function(ringWrap){
-    var circles = ringWrap.querySelectorAll('circle');
-    if(circles.length < 2) return;
-    var fg = circles[1];
-    var percentEl = ringWrap.querySelector('.ring-percent');
-    var dashParts = fg.getAttribute('stroke-dasharray').split(' ');
-    var totalCirc = parseFloat(dashParts[1]);
-    var targetPercent = percentEl && /^\d+%$/.test(percentEl.textContent) ? parseInt(percentEl.textContent, 10) : 0;
-    fg.setAttribute('stroke-dasharray', '0 ' + totalCirc);
-    var startText = percentEl ? percentEl.textContent : '';
-    if(percentEl && /^\d+%$/.test(startText)) percentEl.textContent = '0%';
-    var current = 0;
-    var ringInterval = setInterval(function(){
-      current += 1;
-      if(current >= targetPercent){ current = targetPercent; clearInterval(ringInterval); }
-      var dashLen = (current / 100) * totalCirc;
-      fg.setAttribute('stroke-dasharray', dashLen.toFixed(2) + ' ' + totalCirc);
-      if(percentEl && /^\d+%$/.test(startText)) percentEl.textContent = current + '%';
-    }, 18);
+  document.querySelectorAll('.rating-track-fill').forEach(function(fillEl){
+    var target = parseFloat(fillEl.getAttribute('data-target')) || 0;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ fillEl.style.width = target + '%'; });
+    });
   });
 }
 
